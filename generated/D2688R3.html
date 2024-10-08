@@ -2104,7 +2104,7 @@ it.</p>
 </div></td>
 <td><div>
 
-<div class="sourceCode" id="cb65"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>parse<span class="op">(</span>some_input<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
+<div class="sourceCode" id="cb65"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>parse<span class="op">(</span>some_input<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span> <span class="co">// not proposed</span></span>
 <span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> i <span class="op">=&gt;</span> <span class="co">// ...</span></span>
 <span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">auto</span> x <span class="op">=&gt;</span> <span class="co">// ...</span></span>
 <span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
@@ -2113,10 +2113,11 @@ it.</p>
 </tr>
 </tbody>
 </table>
-<p>But what is <code class="sourceCode cpp">x</code>? Is it the
-unhandled alternatives of the variant, or is it the variant itself?</p>
-<p>In the <code class="sourceCode cpp">parse_int</code> example from
-above,
+<p>In the variable declaration approach, what would
+<code class="sourceCode cpp"><span class="kw">auto</span> x</code> be?
+Is it the unhandled alternatives of the variant, or is it the variant
+itself? Recall that in the <code class="sourceCode cpp">parse_int</code>
+example from above,
 <code class="sourceCode cpp"><span class="kw">auto</span> i</code> was a
 binding to the whole value!</p>
 <p>Note that for polymorphic types we could actually make this work
@@ -3183,17 +3184,17 @@ bind tighter than all binary operators except pointer-to-member.</p>
 <div class="sourceCode" id="cb123"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb123-1"><a href="#cb123-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="op">+</span> <span class="dv">2</span> <span class="cf">match</span> <span class="dv">3</span> <span class="op">+</span> <span class="dv">4</span></span>
 <span id="cb123-2"><a href="#cb123-2" aria-hidden="true" tabindex="-1"></a><span class="co">// parsed as:</span></span>
 <span id="cb123-3"><a href="#cb123-3" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="op">+</span> <span class="op">(</span><span class="dv">2</span> <span class="cf">match</span> <span class="dv">3</span><span class="op">)</span> <span class="op">+</span> <span class="dv">4</span></span></code></pre></div>
-<p>Consider adding a match guard to this expression. In previous
-revisions of this paper, match guards did not require parentheses.</p>
+<p>Consider adding a match guard to this expression. Pre-R3 of this
+paper, match guards did not require parentheses.</p>
 <div class="sourceCode" id="cb124"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> b <span class="op">=</span> p <span class="cf">match</span> <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> x <span class="op">==</span> y;</span></code></pre></div>
 <p>If we apply the same precedence however, this would be parsed as:</p>
 <div class="sourceCode" id="cb125"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> b <span class="op">=</span> p <span class="cf">match</span> <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> x <span class="op">==</span> y;</span>
 <span id="cb125-2"><a href="#cb125-2" aria-hidden="true" tabindex="-1"></a><span class="co">// parsed as:</span></span>
 <span id="cb125-3"><a href="#cb125-3" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> b <span class="op">=</span> <span class="op">(</span>p <span class="cf">match</span> <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> x<span class="op">)</span> <span class="op">==</span> y;</span></code></pre></div>
-<p>This situation is considerably worse than the
+<p>This is considerably worse than the
 <code class="sourceCode cpp"><span class="cf">match</span></code>
-scenario since it’s much more likely for the match guard condition to be
-a relatively complex boolean expression.</p>
+scenario since it’s much more likely for match guard conditions to be
+boolean expressions involving logical operators.</p>
 <p>The resolution of this in R3 is to require parentheses around the
 <code class="sourceCode cpp"><span class="cf">if</span></code> like
 so:</p>
