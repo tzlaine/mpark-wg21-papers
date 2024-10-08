@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-09-29" />
+  <meta name="dcterms.date" content="2024-10-08" />
   <title>Pattern Matching: `match` Expression</title>
   <style>
       code{white-space: pre-wrap;}
@@ -429,7 +429,7 @@ Expression</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-09-29</td>
+    <td>2024-10-08</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -538,6 +538,12 @@ Pointer-to-member and Multiplicative Operator<span></span></a></li>
 <li><a href="#alternative-considered-between-spaceship-and-relational-operator" id="toc-alternative-considered-between-spaceship-and-relational-operator"><span class="toc-section-number">8.8.2</span> Alternative Considered: Between
 Spaceship and Relational Operator<span></span></a></li>
 </ul></li>
+<li><a href="#require-parentheses-on-match-guards" id="toc-require-parentheses-on-match-guards"><span class="toc-section-number">8.9</span> Require Parentheses on Match
+Guards<span></span></a></li>
+<li><a href="#note-on-the-implication-operator" id="toc-note-on-the-implication-operator"><span class="toc-section-number">8.10</span> Note on the Implication
+Operator<span></span></a></li>
+<li><a href="#matching-multiple-values" id="toc-matching-multiple-values"><span class="toc-section-number">8.11</span> Matching Multiple
+Values<span></span></a></li>
 </ul></li>
 <li><a href="#future-extension-exploration" id="toc-future-extension-exploration"><span class="toc-section-number">9</span> Future Extension
 Exploration<span></span></a>
@@ -569,13 +575,24 @@ Acknowledgements<span></span></a></li>
 </div>
 <h1 data-number="1" id="updates-r2-r3"><span class="header-section-number">1</span> Updates R2 → R3<a href="#updates-r2-r3" class="self-link"></a></h1>
 <ul>
-<li>Require parentheses around match guards.
+<li><a href="#require-parentheses-on-match-guards">Require Parentheses
+on Match Guards</a>
 <ul>
 <li><code class="sourceCode cpp"><em>expr</em> <span class="cf">match</span> <em>pattern</em> <span class="cf">if</span> <span class="add" style="color: #006e28"><ins>(</ins></span> <em>condition</em> <span class="add" style="color: #006e28"><ins>)</ins></span></code></li>
 <li><div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>  <em>expr</em> <span class="cf">match</span> <span class="op">{</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <em>pattern</em> <span class="cf">if</span> <span class="add" style="color: #006e28"><ins>(</ins></span> <em>condition</em> <span class="add" style="color: #006e28"><ins>)</ins></span> <span class="op">=&gt;</span> <em>expr-stmt</em></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span></code></pre></div></li>
+<li>Support <em>init-stmt</em> and condition variables in match
+guards.</li>
+</ul></li>
+<li>Added a section <a href="#note-on-the-implication-operator">Note on
+the Implication Operator</a>.</li>
+<li>Changed matching multiple values from <em>braced-init-list</em> to
+<code class="sourceCode cpp"><span class="op">(</span> <em>expression-list</em> <span class="op">)</span></code>.
+<ul>
+<li>See <a href="#matching-multiple-values">Matching Multiple Values</a>
+for details.</li>
 </ul></li>
 </ul>
 <h1 data-number="2" id="updates-r1-r2"><span class="header-section-number">2</span> Updates R1 → R2<a href="#updates-r1-r2" class="self-link"></a></h1>
@@ -1349,7 +1366,7 @@ statement.</p>
 <span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a><em>guard</em><span class="op">:</span></span>
-<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span> <em>expression</em> <span class="op">)</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span> <em>init-statement<sub>opt</sub></em> <em>condition</em> <span class="op">)</span></span>
 <span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a><em>pattern</em><span class="op">:</span></span>
 <span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>    <em>match-pattern</em></span>
@@ -1447,7 +1464,7 @@ variables, or values of an
 <blockquote>
 <div class="line-block"><code class="sourceCode cpp"><span class="op">(</span> <em>pattern</em> <span class="op">)</span></code></div>
 </blockquote>
-<p>A parenthesized pattern is used to group undelimited patterns.</p>
+<p>A parenthesized pattern is used to group non-delimited patterns.</p>
 <ul>
 <li>Matching Condition: <code class="sourceCode cpp"><em>subject</em> <span class="cf">match</span> <em>pattern</em></code></li>
 </ul>
@@ -1856,7 +1873,7 @@ operator [expr.match]<a href="#pattern-matching-operator-expr.match" class="self
 <span id="cb56-34"><a href="#cb56-34" aria-hidden="true" tabindex="-1"></a><span class="va">+     <em>binding-pattern-list</em> , <em>binding-pattern</em></span></span>
 <span id="cb56-35"><a href="#cb56-35" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
 <span id="cb56-36"><a href="#cb56-36" aria-hidden="true" tabindex="-1"></a><span class="va">+ <em>match-guard</em>:</span></span>
-<span id="cb56-37"><a href="#cb56-37" aria-hidden="true" tabindex="-1"></a><span class="va">+     if ( <em>expression</em> )</span></span>
+<span id="cb56-37"><a href="#cb56-37" aria-hidden="true" tabindex="-1"></a><span class="va">+     if ( <em>init-statement<sub>opt</sub></em> <em>condition</em> )</span></span>
 <span id="cb56-38"><a href="#cb56-38" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
 <span id="cb56-39"><a href="#cb56-39" aria-hidden="true" tabindex="-1"></a><span class="va">+ <em>match-select-expression</em></span></span>
 <span id="cb56-40"><a href="#cb56-40" aria-hidden="true" tabindex="-1"></a><span class="va">+     <em>match-subject</em> match constexpr<em><sub>opt</sub></em> <em>trailing-return-type<sub>opt</sub></em> { <em>match-case-seq</em> }</span></span>
@@ -1978,8 +1995,7 @@ example,</p>
 recommended in <span class="citation" data-cites="P1110R0">[<a href="https://wg21.link/p1110r0" role="doc-biblioref">P1110R0</a>]</span>.</li>
 <li><span class="citation" data-cites="P1469R0">[<a href="https://wg21.link/p1469r0" role="doc-biblioref">P1469R0</a>]</span> proposed disallowing use of
 <code class="sourceCode cpp">_</code> as an identifier in the context of
-structured bindings, but this was rejected by EWG. as it’s not referred
-to, and was accepted for C++26.</li>
+structured bindings, but this was rejected by EWG.</li>
 <li><span class="citation" data-cites="P2392R2">[<a href="https://wg21.link/p2392r2" role="doc-biblioref">P2392R2</a>]</span> proposed
 <code class="sourceCode cpp">_</code> as well.</li>
 </ul>
@@ -2033,7 +2049,7 @@ Declaration Syntax for Alternative Pattern<a href="#exploration-of-variable-decl
 <p>This looks more like
 <code class="sourceCode cpp"><span class="cf">case</span></code> labels
 where the alternatives are listed and the appropriate one is chosen. The
-correponding value is then matched with a nested pattern.</p>
+corresponding value is then matched with a nested pattern.</p>
 <p>The absolute minimal syntax would be <code class="sourceCode cpp">std<span class="op">::</span>string s</code>,
 which is rather appealing but ultimately not what is proposed.</p>
 <p>An example using this syntax might be something like:</p>
@@ -2143,7 +2159,7 @@ access. Uniform notation is the backbone of generic programming.</p>
 least for <code class="sourceCode cpp">variant</code>,
 <code class="sourceCode cpp">any</code> and polymorphic types, but
 regardless, the point is that using syntax that works only for
-polymophic types but not <code class="sourceCode cpp">variant</code> is
+polymorphic types but not <code class="sourceCode cpp">variant</code> is
 not desired.</p>
 <p><strong>Question 3</strong>: Initialization? Conversions?
 First-match? Best-match?</p>
@@ -2666,7 +2682,7 @@ table (similar to a vtbl) – the most general form, ideally provided by
 the class author:</p>
 <div class="sourceCode" id="cb96"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>  structure_map <span class="op">(</span>EncapsulatedRect<span class="op">)</span> <span class="op">{</span> topLeft, width, height <span class="op">}</span>;</span></code></pre></div>
 </blockquote>
-<p>and as Bjarne Stroustup points out in <span class="citation" data-cites="P2411R0">[<a href="https://wg21.link/p2411r0" role="doc-biblioref">P2411R0</a>]</span>:</p>
+<p>and as Bjarne Stroustrup points out in <span class="citation" data-cites="P2411R0">[<a href="https://wg21.link/p2411r0" role="doc-biblioref">P2411R0</a>]</span>:</p>
 <blockquote>
 <p>The mapping from an encapsulating type to a set of values used by
 pattern matching must be simple and declarative. The use of <code class="sourceCode cpp">get<span class="op">&lt;&gt;()</span></code> for
@@ -2901,8 +2917,8 @@ following example:</p>
 <p>Here, I’d argue that <code class="sourceCode cpp"><span class="op">(</span><em>b</em> <span class="op">+</span> <em>c</em><span class="op">)</span></code>
 looks like the match subject, and with this precedence it is indeed the
 match subject.</p>
-<p>Another advantage is that (though perhaps silly) it’s typically work
-to add parentheses around the subject rather than around the whole
+<p>Another advantage is that (though perhaps silly) it’s typically less
+work to add parentheses around the subject rather than around the whole
 <code class="sourceCode cpp"><span class="cf">match</span></code>.</p>
 <p>For example, given:</p>
 <div class="sourceCode" id="cb106"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a><em>a</em> <span class="op">+</span> <em>b</em> <span class="cf">match</span> <span class="op">{</span></span>
@@ -2993,8 +3009,8 @@ below,
 e.g. <code class="sourceCode cpp"><span class="op">==</span></code>,
 <code class="sourceCode cpp"><span class="op">&amp;</span></code>, etc
 yield a boolean values which are typically less interesting.</p>
-<p>This addresses some of the disadvantages mentioned in the previous
-section.</p>
+<p>This approach addresses some of the disadvantages mentioned in the
+previous section.</p>
 <div class="sourceCode" id="cb113"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><em>a</em> <span class="op">+</span> <em>b</em> <span class="cf">match</span> <span class="op">{</span></span>
 <span id="cb113-2"><a href="#cb113-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
 <span id="cb113-3"><a href="#cb113-3" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
@@ -3155,6 +3171,198 @@ remain deviations.</p>
 </tr>
 </tbody>
 </table>
+<p>Lastly, a code search for
+<code class="sourceCode cpp"><span class="cf">match</span></code> on
+boolean values in Rust code on GitHub showed that this use case is
+actually quite popular. This was a bit of a surprise, as Rust already
+supports <code class="sourceCode cpp"><span class="cf">if</span></code>
+expressions which could be used for the same purpose. This finding also
+weakened the assumption the main argument behind the approach.</p>
+<h2 data-number="8.9" id="require-parentheses-on-match-guards"><span class="header-section-number">8.9</span> Require Parentheses on Match
+Guards<a href="#require-parentheses-on-match-guards" class="self-link"></a></h2>
+<p>As discussed in <a href="#operator-precedence-of-match">Operator
+Precedence of
+<code class="sourceCode cpp"><span class="cf">match</span></code></a>,
+this paper proposes
+<code class="sourceCode cpp"><span class="cf">match</span></code> to
+bind tighter than all binary operators except pointer-to-member.</p>
+<div class="sourceCode" id="cb124"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="op">+</span> <span class="dv">2</span> <span class="cf">match</span> <span class="dv">3</span> <span class="op">+</span> <span class="dv">4</span></span>
+<span id="cb124-2"><a href="#cb124-2" aria-hidden="true" tabindex="-1"></a><span class="co">// parsed as:</span></span>
+<span id="cb124-3"><a href="#cb124-3" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="op">+</span> <span class="op">(</span><span class="dv">2</span> <span class="cf">match</span> <span class="dv">3</span><span class="op">)</span> <span class="op">+</span> <span class="dv">4</span></span></code></pre></div>
+<p>Consider adding a match guard to this expression. In previous
+revisions of this paper, match guards did not require parentheses.</p>
+<div class="sourceCode" id="cb125"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> b <span class="op">=</span> p <span class="cf">match</span> <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> x <span class="op">==</span> y;</span></code></pre></div>
+<p>If we apply the same precedence however, this would be parsed as:</p>
+<div class="sourceCode" id="cb126"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb126-1"><a href="#cb126-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> b <span class="op">=</span> p <span class="cf">match</span> <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> x <span class="op">==</span> y;</span>
+<span id="cb126-2"><a href="#cb126-2" aria-hidden="true" tabindex="-1"></a><span class="co">// parsed as:</span></span>
+<span id="cb126-3"><a href="#cb126-3" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> b <span class="op">=</span> <span class="op">(</span>p <span class="cf">match</span> <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> x<span class="op">)</span> <span class="op">==</span> y;</span></code></pre></div>
+<p>This situation is considerably worse than the
+<code class="sourceCode cpp"><span class="cf">match</span></code>
+scenario since it’s much more likely for the match guard condition to be
+a relatively complex boolean expression.</p>
+<p>The resolution of this in R3 is to require parentheses around the
+<code class="sourceCode cpp"><span class="cf">if</span></code> like
+so:</p>
+<div class="sourceCode" id="cb127"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> b <span class="op">=</span> p <span class="cf">match</span> <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> <span class="op">(</span>x <span class="op">==</span> y<span class="op">)</span>;</span></code></pre></div>
+<p>Combining this with subsequent logical operators is unambiguous and
+easier to read:</p>
+<div class="sourceCode" id="cb128"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> b <span class="op">=</span> p <span class="cf">match</span> <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> <span class="op">(</span>x <span class="op">==</span> y<span class="op">)</span> <span class="op">&amp;&amp;</span> pred<span class="op">()</span>;</span>
+<span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a><span class="co">// parsed as:</span></span>
+<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> b <span class="op">=</span> <span class="op">(</span>p <span class="cf">match</span> <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> <span class="op">(</span>x <span class="op">==</span> y<span class="op">))</span> <span class="op">&amp;&amp;</span> pred<span class="op">()</span>;</span></code></pre></div>
+<p>The match guard inside of match select expressions do not have this
+problem, since it is delimited by
+<code class="sourceCode cpp"><span class="op">=&gt;</span></code>.
+However, the proposed solution is to keep the two consistent, along with
+the rest of the language.</p>
+<div class="sourceCode" id="cb129"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a>p <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb129-2"><a href="#cb129-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> <span class="op">(</span>x <span class="op">==</span> y<span class="op">)</span> <span class="op">=&gt;</span> <span class="co">// parens around `if` required.</span></span>
+<span id="cb129-3"><a href="#cb129-3" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb129-4"><a href="#cb129-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This approach also makes it easier to bring match guards up to parity
+with the existing
+<code class="sourceCode cpp"><span class="cf">if</span></code> features
+such as condition variables and init-statements.</p>
+<div class="sourceCode" id="cb130"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a>p <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb130-2"><a href="#cb130-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> <span class="op">(</span><span class="dt">bool</span> b <span class="op">=</span> x <span class="op">==</span> y<span class="op">)</span> <span class="op">=&gt;</span> <span class="co">// `b` available here</span></span>
+<span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="cf">if</span> <span class="op">(</span><span class="kw">auto</span> a <span class="op">=</span> f<span class="op">(</span>x, y<span class="op">)</span>; g<span class="op">(</span>a<span class="op">))</span> <span class="op">=&gt;</span></span>
+<span id="cb130-4"><a href="#cb130-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// init-stmt for `a`, guard condition is `g(a)`.</span></span>
+<span id="cb130-5"><a href="#cb130-5" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb130-6"><a href="#cb130-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 data-number="8.10" id="note-on-the-implication-operator"><span class="header-section-number">8.10</span> Note on the Implication
+Operator<a href="#note-on-the-implication-operator" class="self-link"></a></h2>
+<p><span class="citation" data-cites="P2971R2">[<a href="https://wg21.link/p2971r2" role="doc-biblioref">P2971R2</a>]</span> proposes an <code class="sourceCode cpp"><span class="kw">operator</span><span class="op">=&gt;</span></code>
+which would introduce the same token
+<code class="sourceCode cpp"><span class="op">=&gt;</span></code>, and
+would allow expressions that look like
+<code class="sourceCode cpp">x <span class="op">=&gt;</span> y</code>.
+It has been raised that this may conflict with pattern matching’s use of
+<code class="sourceCode cpp"><span class="op">=&gt;</span></code>. While
+this is true, I don’t consider it to be a showstopper either way.</p>
+<p>If EWG desires to adopt <span class="citation" data-cites="P2971R2">[<a href="https://wg21.link/p2971r2" role="doc-biblioref">P2971R2</a>]</span>, my proposed resolution for
+pattern matching is to interpret
+<code class="sourceCode cpp"><span class="op">=&gt;</span></code> as a
+pattern matching token in pattern matching context. This is consistent
+with the treatment of other rare expressions that conflict with patterns
+in this proposal.</p>
+<div class="sourceCode" id="cb131"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a>x <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb131-2"><a href="#cb131-2" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">=&gt;</span> <span class="co">// wildcard, NOT a reference to an `_` in scope.</span></span>
+<span id="cb131-3"><a href="#cb131-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> <span class="op">[</span>x<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// structured bindings pattern with 1 element,</span></span>
+<span id="cb131-4"><a href="#cb131-4" aria-hidden="true" tabindex="-1"></a>             <span class="co">// NOT an array-access into a variable `let`.</span></span>
+<span id="cb131-5"><a href="#cb131-5" aria-hidden="true" tabindex="-1"></a>  a <span class="op">=&gt;</span> b <span class="op">=&gt;</span> c; <span class="co">// parsed as `a =&gt; (b =&gt; c);`</span></span>
+<span id="cb131-6"><a href="#cb131-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span>a <span class="op">=&gt;</span> b<span class="op">)</span> <span class="op">=&gt;</span> c; <span class="co">// match against the result of `(a =&gt; b)`.</span></span>
+<span id="cb131-7"><a href="#cb131-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<p>I suspect the desire to use the result of
+<code class="sourceCode cpp">a <span class="op">=&gt;</span> b</code> as
+a pattern to be quite rare.</p>
+<p>Another consideration is to use a different separation token for
+pattern matching. Eight other languages that provide pattern matching
+and their separation tokens were considered. Haskell, OCaml, and Java
+use <code class="sourceCode cpp"><span class="op">-&gt;</span></code>,
+Rust, Scala, and C# use
+<code class="sourceCode cpp"><span class="op">=&gt;</span></code>,
+Python and Swift use
+<code class="sourceCode cpp"><span class="op">:</span></code>.</p>
+<p><code class="sourceCode cpp"><span class="op">-&gt;</span></code>
+would present the exact same problem as
+<code class="sourceCode cpp"><span class="op">=&gt;</span></code>.
+<code class="sourceCode cpp"><span class="op">:</span></code> may be
+visually confusing given use cases such as</p>
+<div class="sourceCode" id="cb132"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a>v <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb132-2"><a href="#cb132-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">:</span> <span class="cf">let</span> i<span class="op">:</span> <span class="dv">0</span>;</span>
+<span id="cb132-3"><a href="#cb132-3" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>string<span class="op">:</span> <span class="cf">let</span> s<span class="op">:</span> <span class="dv">1</span>;</span>
+<span id="cb132-4"><a href="#cb132-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<p>compared to:</p>
+<div class="sourceCode" id="cb133"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a>v <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb133-2"><a href="#cb133-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span><span class="op">:</span> <span class="cf">let</span> i <span class="op">=&gt;</span> <span class="dv">0</span>;</span>
+<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>string<span class="op">:</span> <span class="cf">let</span> s <span class="op">=&gt;</span> <span class="dv">1</span>;</span>
+<span id="cb133-4"><a href="#cb133-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<p>A brand new token such as
+<code class="sourceCode cpp"><span class="op">~&gt;</span></code> could
+work as well, though much less preferred.</p>
+<h2 data-number="8.11" id="matching-multiple-values"><span class="header-section-number">8.11</span> Matching Multiple Values<a href="#matching-multiple-values" class="self-link"></a></h2>
+<p>The proposed syntax to match multiple values is like so:</p>
+<div class="sourceCode" id="cb134"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb134-1"><a href="#cb134-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="dt">int</span> a, <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb134-2"><a href="#cb134-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span>a, b<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span> <span class="co">// produces an implicit struct that can be</span></span>
+<span id="cb134-3"><a href="#cb134-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span><span class="dv">1</span>, <span class="dv">2</span><span class="op">]</span> <span class="op">=&gt;</span> <span class="dv">0</span>; <span class="co">// matched with the structured bindings pattern.</span></span>
+<span id="cb134-4"><a href="#cb134-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="op">=&gt;</span> <span class="dv">1</span>;</span>
+<span id="cb134-5"><a href="#cb134-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb134-6"><a href="#cb134-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>A single parenthesized expression is still just that value:</p>
+<div class="sourceCode" id="cb135"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="dt">int</span> a, <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb135-2"><a href="#cb135-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span>a<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span> <span class="co">// this is still just a parenthesized expression,</span></span>
+<span id="cb135-3"><a href="#cb135-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span> <span class="op">=&gt;</span> <span class="dv">0</span>;   <span class="co">// so structured bindings pattern cannot be used.</span></span>
+<span id="cb135-4"><a href="#cb135-4" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=&gt;</span> <span class="dv">1</span>;</span>
+<span id="cb135-5"><a href="#cb135-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb135-6"><a href="#cb135-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The syntax for matching multiple values was changed in R3 from using
+<code class="sourceCode cpp"><em>braced-init-list</em></code> to <code class="sourceCode cpp"><span class="op">(</span> <em>expression-list</em> <span class="op">)</span></code>.</p>
+<p>The main issue was due to statement-expression syntax, which is a GCC
+extension that is widely deployed. On GCC and Clang, the feature is
+available by default.</p>
+<p>Consider an example like:</p>
+<div class="sourceCode" id="cb136"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb136-1"><a href="#cb136-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pre-R3 syntax</span></span>
+<span id="cb136-2"><a href="#cb136-2" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> f<span class="op">(</span><span class="dt">int</span> a, <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb136-3"><a href="#cb136-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">!({</span>a, b<span class="op">}</span> <span class="cf">match</span> <span class="op">[</span><span class="dv">0</span>, <span class="dv">0</span><span class="op">])</span>; <span class="co">// the `({` introduces a statement-expression</span></span>
+<span id="cb136-4"><a href="#cb136-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb136-5"><a href="#cb136-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb136-6"><a href="#cb136-6" aria-hidden="true" tabindex="-1"></a><span class="co">// R3 syntax</span></span>
+<span id="cb136-7"><a href="#cb136-7" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> f<span class="op">(</span><span class="dt">int</span> a, <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb136-8"><a href="#cb136-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">!((</span>a, b<span class="op">)</span> <span class="cf">match</span> <span class="op">[</span><span class="dv">0</span>, <span class="dv">0</span><span class="op">])</span>; <span class="co">// this is good!</span></span>
+<span id="cb136-9"><a href="#cb136-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>We end up with a sequence of
+<code class="sourceCode cpp"><span class="op">(</span></code> followed
+by <code class="sourceCode cpp"><span class="op">{</span></code> which
+is interpreted as a statement-expression.</p>
+<p>This is similar to an already-known issue at block scope:</p>
+<div class="sourceCode" id="cb137"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="co">// pre-R3 syntax</span></span>
+<span id="cb137-2"><a href="#cb137-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="dt">int</span> a, <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb137-3"><a href="#cb137-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">{</span>a, b<span class="op">}</span> <span class="cf">match</span> <span class="op">{</span> <span class="co">// the `{` introduces a compound statement</span></span>
+<span id="cb137-4"><a href="#cb137-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span><span class="dv">0</span>, <span class="dv">0</span><span class="op">]</span> <span class="op">=&gt;</span> <span class="op">[]</span> <span class="op">{</span> std<span class="op">::</span>print<span class="op">(</span><span class="st">&quot;on origin&quot;</span><span class="op">)</span>; <span class="op">}()</span>;</span>
+<span id="cb137-5"><a href="#cb137-5" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=&gt;</span> <span class="op">[]</span> <span class="op">{</span> std<span class="op">::</span>print<span class="op">(</span><span class="st">&quot;not on origin&quot;</span><span class="op">)</span>; <span class="op">}()</span>;</span>
+<span id="cb137-6"><a href="#cb137-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb137-7"><a href="#cb137-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb137-8"><a href="#cb137-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb137-9"><a href="#cb137-9" aria-hidden="true" tabindex="-1"></a><span class="co">// R3 syntax</span></span>
+<span id="cb137-10"><a href="#cb137-10" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="dt">int</span> a, <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb137-11"><a href="#cb137-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span>a, b<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span> <span class="co">// this is good!</span></span>
+<span id="cb137-12"><a href="#cb137-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span><span class="dv">0</span>, <span class="dv">0</span><span class="op">]</span> <span class="op">=&gt;</span> <span class="op">[]</span> <span class="op">{</span> std<span class="op">::</span>print<span class="op">(</span><span class="st">&quot;on origin&quot;</span><span class="op">)</span>; <span class="op">}()</span>;</span>
+<span id="cb137-13"><a href="#cb137-13" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=&gt;</span> <span class="op">[]</span> <span class="op">{</span> std<span class="op">::</span>print<span class="op">(</span><span class="st">&quot;not on origin&quot;</span><span class="op">)</span>; <span class="op">}()</span>;</span>
+<span id="cb137-14"><a href="#cb137-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb137-15"><a href="#cb137-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>While the compound statement ambiguity “only” arises within
+<em>statement-or-expression</em> contexts such as block scope, the
+statement-expression ambiguity is significantly worse as it can appear
+anywhere in an expression.</p>
+<p>As such, the proposed solution is to use parentheses instead which
+resolves not only the statement-expression ambiguity but also the issue
+at block-scope.</p>
+<p>The main downside of the parentheses approach is the slight
+awkwardness around the single value case.</p>
+<div class="sourceCode" id="cb138"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb138-1"><a href="#cb138-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="dt">int</span> a, <span class="dt">int</span> b<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb138-2"><a href="#cb138-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// pre-R3 syntax</span></span>
+<span id="cb138-3"><a href="#cb138-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> _ <span class="op">=</span> <span class="op">{</span>a<span class="op">}</span> <span class="cf">match</span> <span class="op">[</span><span class="dv">1</span><span class="op">]</span>;       <span class="co">// braces always produces an implicit struct</span></span>
+<span id="cb138-4"><a href="#cb138-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> _ <span class="op">=</span> <span class="op">{</span>a, b<span class="op">}</span> <span class="cf">match</span> <span class="op">[</span><span class="dv">1</span>, <span class="dv">2</span><span class="op">]</span>; <span class="co">// so structured bindings pattern are always used.</span></span>
+<span id="cb138-5"><a href="#cb138-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> _ <span class="op">=</span> <span class="op">(</span>a<span class="op">)</span> <span class="cf">match</span> <span class="dv">1</span>;         <span class="co">// parentheses are always parenthesized expressions.</span></span>
+<span id="cb138-6"><a href="#cb138-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> _ <span class="op">=</span> <span class="op">(</span>a, b<span class="op">)</span> <span class="cf">match</span> <span class="dv">1</span>; <span class="co">// this is effectively `b match 1` using comma operator.</span></span>
+<span id="cb138-7"><a href="#cb138-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb138-8"><a href="#cb138-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">// R3 syntax</span></span>
+<span id="cb138-9"><a href="#cb138-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> _ <span class="op">=</span> <span class="op">(</span>a<span class="op">)</span> <span class="cf">match</span> <span class="dv">1</span>;         <span class="co">// only multi-value parens introduce an implicit struct</span></span>
+<span id="cb138-10"><a href="#cb138-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> _ <span class="op">=</span> <span class="op">(</span>a, b<span class="op">)</span> <span class="cf">match</span> <span class="op">[</span><span class="dv">1</span>, <span class="dv">2</span><span class="op">]</span>; <span class="co">// so structured bindings pattern are sometimes used.</span></span>
+<span id="cb138-11"><a href="#cb138-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The use of the comma operator has dubious use cases in the first
+place, and the 1-tuple awkwardness is a rather familiar one in many
+other languages that provide language-level tuples. In those languages,
+<code class="sourceCode cpp"><span class="op">(</span><span class="dv">1</span><span class="op">)</span></code>
+is a parenthesized expression, <code class="sourceCode cpp"><span class="op">(</span><span class="dv">1</span>, <span class="dv">2</span><span class="op">)</span></code>
+is a 2-tuple, and you need <code class="sourceCode cpp"><span class="op">(</span><span class="dv">1</span>,<span class="op">)</span></code>
+for a 1-tuple. Aside from the 1-tuple case (expected to be uncommon)
+needing to be written as <code class="sourceCode cpp">std<span class="op">::</span>tuple<span class="op">(</span><span class="dv">1</span><span class="op">)</span></code>
+instead of <code class="sourceCode cpp"><span class="op">(</span><span class="dv">1</span>,<span class="op">)</span></code>,
+the <code class="sourceCode cpp"><span class="op">(</span><span class="dv">1</span><span class="op">)</span></code>
+and <code class="sourceCode cpp"><span class="op">(</span><span class="dv">1</span>, <span class="dv">2</span><span class="op">)</span></code>
+has the “expected” semantics.</p>
+<p>In the end, given the syntactic ambiguities introduced by braces,
+parentheses are proposed to be used for multi-value pattern match.</p>
 <h1 data-number="9" id="future-extension-exploration"><span class="header-section-number">9</span> Future Extension Exploration<a href="#future-extension-exploration" class="self-link"></a></h1>
 <p>The following lists patterns and features excluded from this paper,
 but could still be useful future extensions.</p>
@@ -3167,25 +3375,25 @@ Constraint Pattern<a href="#static-type-checking-with-constraint-pattern" class=
 <p>The static condition of a constraint pattern would be that <code class="sourceCode cpp"><span class="kw">decltype</span><span class="op">(</span><em>subject</em><span class="op">)</span></code>
 satisfies the <em>type-constraint</em>.</p>
 <p>For example,</p>
-<div class="sourceCode" id="cb124"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> p<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb124-2"><a href="#cb124-2" aria-hidden="true" tabindex="-1"></a>  p <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb124-3"><a href="#cb124-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span>std<span class="op">::</span>convertible_to<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span>, <span class="dv">0</span><span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// statically check that first elem converts to int.</span></span>
-<span id="cb124-4"><a href="#cb124-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
-<span id="cb124-5"><a href="#cb124-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb124-6"><a href="#cb124-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb139"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> p<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb139-2"><a href="#cb139-2" aria-hidden="true" tabindex="-1"></a>  p <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb139-3"><a href="#cb139-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span>std<span class="op">::</span>convertible_to<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span>, <span class="dv">0</span><span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// statically check that first elem converts to int.</span></span>
+<span id="cb139-4"><a href="#cb139-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb139-5"><a href="#cb139-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb139-6"><a href="#cb139-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>If used with structured bindings, this becomes very similar to the
 static type checking proposed in <span class="citation" data-cites="P0480R1">[<a href="https://wg21.link/p0480r1" role="doc-biblioref">P0480R1</a>]</span>.</p>
-<div class="sourceCode" id="cb125"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb125-1"><a href="#cb125-1" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> <span class="op">[</span>std<span class="op">::</span>same_as<span class="op">&lt;</span>std<span class="op">::</span>string<span class="op">&gt;</span> a, std<span class="op">::</span>same_as<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> b<span class="op">]</span> <span class="op">=</span> f<span class="op">()</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb140"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb140-1"><a href="#cb140-1" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> <span class="op">[</span>std<span class="op">::</span>same_as<span class="op">&lt;</span>std<span class="op">::</span>string<span class="op">&gt;</span> a, std<span class="op">::</span>same_as<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> b<span class="op">]</span> <span class="op">=</span> f<span class="op">()</span>;</span></code></pre></div>
 <p>The syntax changes would be:</p>
 <div>
-<div class="sourceCode" id="cb126"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb126-1"><a href="#cb126-1" aria-hidden="true" tabindex="-1"></a>  <em>match-pattern</em></span>
-<span id="cb126-2"><a href="#cb126-2" aria-hidden="true" tabindex="-1"></a>      // ...</span>
-<span id="cb126-3"><a href="#cb126-3" aria-hidden="true" tabindex="-1"></a><span class="va">+     <em>type-constraint</em></span></span></code></pre></div>
+<div class="sourceCode" id="cb141"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a>  <em>match-pattern</em></span>
+<span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a>      // ...</span>
+<span id="cb141-3"><a href="#cb141-3" aria-hidden="true" tabindex="-1"></a><span class="va">+     <em>type-constraint</em></span></span></code></pre></div>
 </div>
 <div>
-<div class="sourceCode" id="cb127"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a>  <em>binding-pattern</em></span>
-<span id="cb127-2"><a href="#cb127-2" aria-hidden="true" tabindex="-1"></a>      // ...</span>
-<span id="cb127-3"><a href="#cb127-3" aria-hidden="true" tabindex="-1"></a><span class="va">+     <em>type-constraint</em> <em>identifier</em></span></span></code></pre></div>
+<div class="sourceCode" id="cb142"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a>  <em>binding-pattern</em></span>
+<span id="cb142-2"><a href="#cb142-2" aria-hidden="true" tabindex="-1"></a>      // ...</span>
+<span id="cb142-3"><a href="#cb142-3" aria-hidden="true" tabindex="-1"></a><span class="va">+     <em>type-constraint</em> <em>identifier</em></span></span></code></pre></div>
 </div>
 <h2 data-number="9.2" id="testing-the-static-conditions-with-match-requires"><span class="header-section-number">9.2</span> Testing the Static Conditions
 with <code class="sourceCode cpp"><span class="cf">match</span> <span class="kw">requires</span></code><a href="#testing-the-static-conditions-with-match-requires" class="self-link"></a></h2>
@@ -3214,35 +3422,35 @@ instead.</p>
 <tr class="odd">
 <td><div>
 
-<div class="sourceCode" id="cb128"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a>  x <span class="cf">match</span> <span class="kw">requires</span> <span class="op">{</span> <span class="co">// not proposed</span></span>
-<span id="cb128-3"><a href="#cb128-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb128-4"><a href="#cb128-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;hello&quot;</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb128-5"><a href="#cb128-5" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb128-6"><a href="#cb128-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb128-7"><a href="#cb128-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb128-8"><a href="#cb128-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb128-9"><a href="#cb128-9" aria-hidden="true" tabindex="-1"></a>f<span class="op">(</span><span class="st">&quot;hello&quot;</span><span class="bu">s</span><span class="op">)</span>; <span class="co">// fine, skips 0</span></span></code></pre></div>
+<div class="sourceCode" id="cb143"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb143-2"><a href="#cb143-2" aria-hidden="true" tabindex="-1"></a>  x <span class="cf">match</span> <span class="kw">requires</span> <span class="op">{</span> <span class="co">// not proposed</span></span>
+<span id="cb143-3"><a href="#cb143-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb143-4"><a href="#cb143-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;hello&quot;</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb143-5"><a href="#cb143-5" aria-hidden="true" tabindex="-1"></a>    _ <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb143-6"><a href="#cb143-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb143-7"><a href="#cb143-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb143-8"><a href="#cb143-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb143-9"><a href="#cb143-9" aria-hidden="true" tabindex="-1"></a>f<span class="op">(</span><span class="st">&quot;hello&quot;</span><span class="bu">s</span><span class="op">)</span>; <span class="co">// fine, skips 0</span></span></code></pre></div>
 
 </div></td>
 <td><div>
 
-<div class="sourceCode" id="cb129"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb129-2"><a href="#cb129-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><span class="kw">requires</span> <span class="op">{</span> x <span class="op">==</span> <span class="dv">0</span>; <span class="op">})</span> <span class="op">{</span></span>
-<span id="cb129-3"><a href="#cb129-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>x <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb129-4"><a href="#cb129-4" aria-hidden="true" tabindex="-1"></a>      <span class="co">// ...</span></span>
-<span id="cb129-5"><a href="#cb129-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">goto</span> done;</span>
-<span id="cb129-6"><a href="#cb129-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb129-7"><a href="#cb129-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb129-8"><a href="#cb129-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><span class="kw">requires</span> <span class="op">{</span> x <span class="op">==</span> <span class="st">&quot;hello&quot;</span>; <span class="op">})</span> <span class="op">{</span></span>
-<span id="cb129-9"><a href="#cb129-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>x <span class="op">==</span> <span class="st">&quot;hello&quot;</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb129-10"><a href="#cb129-10" aria-hidden="true" tabindex="-1"></a>      <span class="co">// ...</span></span>
-<span id="cb129-11"><a href="#cb129-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">goto</span> done;</span>
-<span id="cb129-12"><a href="#cb129-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb129-13"><a href="#cb129-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb129-14"><a href="#cb129-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
-<span id="cb129-15"><a href="#cb129-15" aria-hidden="true" tabindex="-1"></a>  done<span class="op">:</span>;</span>
-<span id="cb129-16"><a href="#cb129-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb144"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb144-1"><a href="#cb144-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb144-2"><a href="#cb144-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><span class="kw">requires</span> <span class="op">{</span> x <span class="op">==</span> <span class="dv">0</span>; <span class="op">})</span> <span class="op">{</span></span>
+<span id="cb144-3"><a href="#cb144-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>x <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb144-4"><a href="#cb144-4" aria-hidden="true" tabindex="-1"></a>      <span class="co">// ...</span></span>
+<span id="cb144-5"><a href="#cb144-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">goto</span> done;</span>
+<span id="cb144-6"><a href="#cb144-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb144-7"><a href="#cb144-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb144-8"><a href="#cb144-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><span class="kw">requires</span> <span class="op">{</span> x <span class="op">==</span> <span class="st">&quot;hello&quot;</span>; <span class="op">})</span> <span class="op">{</span></span>
+<span id="cb144-9"><a href="#cb144-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>x <span class="op">==</span> <span class="st">&quot;hello&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb144-10"><a href="#cb144-10" aria-hidden="true" tabindex="-1"></a>      <span class="co">// ...</span></span>
+<span id="cb144-11"><a href="#cb144-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">goto</span> done;</span>
+<span id="cb144-12"><a href="#cb144-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb144-13"><a href="#cb144-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb144-14"><a href="#cb144-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
+<span id="cb144-15"><a href="#cb144-15" aria-hidden="true" tabindex="-1"></a>  done<span class="op">:</span>;</span>
+<span id="cb144-16"><a href="#cb144-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 
 </div></td>
 </tr>
@@ -3251,34 +3459,34 @@ instead.</p>
 <p>Using the constraint pattern from <a href="#static-type-checking-with-constraint-pattern">Static Type
 Checking with Constraint Pattern</a>, we can perform a sequence of
 static type tests.</p>
-<div class="sourceCode" id="cb130"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb130-2"><a href="#cb130-2" aria-hidden="true" tabindex="-1"></a>  x <span class="cf">match</span> <span class="kw">requires</span> <span class="op">{</span> <span class="co">// not proposed</span></span>
-<span id="cb130-3"><a href="#cb130-3" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>same_as<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb130-4"><a href="#cb130-4" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>integral <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb130-5"><a href="#cb130-5" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>same_as<span class="op">&lt;</span>std<span class="op">::</span>string_view<span class="op">&gt;</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb130-6"><a href="#cb130-6" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>range <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb130-7"><a href="#cb130-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb130-8"><a href="#cb130-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb145"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb145-2"><a href="#cb145-2" aria-hidden="true" tabindex="-1"></a>  x <span class="cf">match</span> <span class="kw">requires</span> <span class="op">{</span> <span class="co">// not proposed</span></span>
+<span id="cb145-3"><a href="#cb145-3" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>same_as<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb145-4"><a href="#cb145-4" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>integral <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb145-5"><a href="#cb145-5" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>same_as<span class="op">&lt;</span>std<span class="op">::</span>string_view<span class="op">&gt;</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb145-6"><a href="#cb145-6" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>range <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb145-7"><a href="#cb145-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb145-8"><a href="#cb145-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>Using the
 <code class="sourceCode cpp"><span class="cf">let</span></code> pattern,
 we can even bind names to each of these:</p>
-<div class="sourceCode" id="cb131"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb131-2"><a href="#cb131-2" aria-hidden="true" tabindex="-1"></a>  x <span class="cf">match</span> <span class="kw">requires</span> <span class="op">{</span> <span class="co">// not proposed</span></span>
-<span id="cb131-3"><a href="#cb131-3" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>same_as<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span> <span class="cf">let</span> b <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb131-4"><a href="#cb131-4" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>integral <span class="cf">let</span> i <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb131-5"><a href="#cb131-5" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>same_as<span class="op">&lt;</span>std<span class="op">::</span>string_view<span class="op">&gt;</span> <span class="cf">let</span> sv <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb131-6"><a href="#cb131-6" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>range <span class="cf">let</span> r <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb131-7"><a href="#cb131-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb131-8"><a href="#cb131-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb146"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb146-1"><a href="#cb146-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb146-2"><a href="#cb146-2" aria-hidden="true" tabindex="-1"></a>  x <span class="cf">match</span> <span class="kw">requires</span> <span class="op">{</span> <span class="co">// not proposed</span></span>
+<span id="cb146-3"><a href="#cb146-3" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>same_as<span class="op">&lt;</span><span class="dt">bool</span><span class="op">&gt;</span> <span class="cf">let</span> b <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb146-4"><a href="#cb146-4" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>integral <span class="cf">let</span> i <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb146-5"><a href="#cb146-5" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>same_as<span class="op">&lt;</span>std<span class="op">::</span>string_view<span class="op">&gt;</span> <span class="cf">let</span> sv <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb146-6"><a href="#cb146-6" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>range <span class="cf">let</span> r <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb146-7"><a href="#cb146-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb146-8"><a href="#cb146-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>Another example with structured bindings patterns:</p>
-<div class="sourceCode" id="cb132"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb132-2"><a href="#cb132-2" aria-hidden="true" tabindex="-1"></a>  x <span class="cf">match</span> <span class="kw">requires</span> <span class="op">{</span> <span class="co">// not proposed</span></span>
-<span id="cb132-3"><a href="#cb132-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">let</span> <span class="op">[</span>x<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb132-4"><a href="#cb132-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb132-5"><a href="#cb132-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">let</span> <span class="op">[</span>x, y, z<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb132-6"><a href="#cb132-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">let</span> <span class="op">[...</span>xs<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb132-7"><a href="#cb132-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb132-8"><a href="#cb132-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb147"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span><span class="kw">auto</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb147-2"><a href="#cb147-2" aria-hidden="true" tabindex="-1"></a>  x <span class="cf">match</span> <span class="kw">requires</span> <span class="op">{</span> <span class="co">// not proposed</span></span>
+<span id="cb147-3"><a href="#cb147-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">let</span> <span class="op">[</span>x<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb147-4"><a href="#cb147-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">let</span> <span class="op">[</span>x, y<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb147-5"><a href="#cb147-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">let</span> <span class="op">[</span>x, y, z<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb147-6"><a href="#cb147-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">let</span> <span class="op">[...</span>xs<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb147-7"><a href="#cb147-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb147-8"><a href="#cb147-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>Rather than the static condition (matching size requirement) of
 structured bindings pattern being checked, they are <code class="sourceCode cpp"><span class="cf">if</span> <span class="kw">constexpr</span></code>
 tested instead.</p>
@@ -3297,17 +3505,17 @@ tested instead.</p>
 <tr class="odd">
 <td><div>
 
-<div class="sourceCode" id="cb133"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span><em>condition</em><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb133-2"><a href="#cb133-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
-<span id="cb133-3"><a href="#cb133-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb148"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="op">(</span><em>condition</em><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb148-2"><a href="#cb148-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
+<span id="cb148-3"><a href="#cb148-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 
 </div></td>
 <td><div>
 
-<div class="sourceCode" id="cb134"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb134-1"><a href="#cb134-1" aria-hidden="true" tabindex="-1"></a><span class="co">// match constexpr</span></span>
-<span id="cb134-2"><a href="#cb134-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><em>condition</em><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb134-3"><a href="#cb134-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
-<span id="cb134-4"><a href="#cb134-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb149"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb149-1"><a href="#cb149-1" aria-hidden="true" tabindex="-1"></a><span class="co">// match constexpr</span></span>
+<span id="cb149-2"><a href="#cb149-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><em>condition</em><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb149-3"><a href="#cb149-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
+<span id="cb149-4"><a href="#cb149-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 
 </div></td>
 </tr>
@@ -3330,20 +3538,20 @@ tested instead.</p>
 <tr class="odd">
 <td><div>
 
-<div class="sourceCode" id="cb135"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><span class="kw">requires</span> <span class="op">{</span> <em>condition</em> ; <span class="op">})</span> <span class="op">{</span></span>
-<span id="cb135-2"><a href="#cb135-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span><em>condition</em><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb135-3"><a href="#cb135-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
-<span id="cb135-4"><a href="#cb135-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb135-5"><a href="#cb135-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb150"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb150-1"><a href="#cb150-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><span class="kw">requires</span> <span class="op">{</span> <em>condition</em> ; <span class="op">})</span> <span class="op">{</span></span>
+<span id="cb150-2"><a href="#cb150-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span><em>condition</em><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb150-3"><a href="#cb150-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb150-4"><a href="#cb150-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb150-5"><a href="#cb150-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 
 </div></td>
 <td><div>
 
-<div class="sourceCode" id="cb136"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb136-1"><a href="#cb136-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><span class="kw">requires</span> <span class="op">{</span> <em>condition</em> ; <span class="op">})</span> <span class="op">{</span></span>
-<span id="cb136-2"><a href="#cb136-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><em>condition</em><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb136-3"><a href="#cb136-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
-<span id="cb136-4"><a href="#cb136-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb136-5"><a href="#cb136-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb151"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><span class="kw">requires</span> <span class="op">{</span> <em>condition</em> ; <span class="op">})</span> <span class="op">{</span></span>
+<span id="cb151-2"><a href="#cb151-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span><em>condition</em><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb151-3"><a href="#cb151-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb151-4"><a href="#cb151-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb151-5"><a href="#cb151-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 
 </div></td>
 </tr>
@@ -3373,42 +3581,42 @@ patterns.</p>
 <tr class="odd">
 <td><div>
 
-<div class="sourceCode" id="cb137"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a>direction <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb137-2"><a href="#cb137-2" aria-hidden="true" tabindex="-1"></a>  <span class="ch">&#39;N&#39;</span> <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
-<span id="cb137-3"><a href="#cb137-3" aria-hidden="true" tabindex="-1"></a>  <span class="ch">&#39;E&#39;</span> <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
-<span id="cb137-4"><a href="#cb137-4" aria-hidden="true" tabindex="-1"></a>  <span class="ch">&#39;S&#39;</span> <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
-<span id="cb137-5"><a href="#cb137-5" aria-hidden="true" tabindex="-1"></a>  <span class="ch">&#39;W&#39;</span> <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
-<span id="cb137-6"><a href="#cb137-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb152"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb152-1"><a href="#cb152-1" aria-hidden="true" tabindex="-1"></a>direction <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb152-2"><a href="#cb152-2" aria-hidden="true" tabindex="-1"></a>  <span class="ch">&#39;N&#39;</span> <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
+<span id="cb152-3"><a href="#cb152-3" aria-hidden="true" tabindex="-1"></a>  <span class="ch">&#39;E&#39;</span> <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
+<span id="cb152-4"><a href="#cb152-4" aria-hidden="true" tabindex="-1"></a>  <span class="ch">&#39;S&#39;</span> <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
+<span id="cb152-5"><a href="#cb152-5" aria-hidden="true" tabindex="-1"></a>  <span class="ch">&#39;W&#39;</span> <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
+<span id="cb152-6"><a href="#cb152-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
 
 </div></td>
 <td><div>
 
-<div class="sourceCode" id="cb138"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb138-1"><a href="#cb138-1" aria-hidden="true" tabindex="-1"></a>direction <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb138-2"><a href="#cb138-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">or</span><span class="op">(</span><span class="ch">&#39;N&#39;</span>, <span class="ch">&#39;S&#39;</span><span class="op">)</span> <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
-<span id="cb138-3"><a href="#cb138-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">or</span><span class="op">(</span><span class="ch">&#39;E&#39;</span>, <span class="ch">&#39;W&#39;</span><span class="op">)</span> <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
-<span id="cb138-4"><a href="#cb138-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb153"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a>direction <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb153-2"><a href="#cb153-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">or</span><span class="op">(</span><span class="ch">&#39;N&#39;</span>, <span class="ch">&#39;S&#39;</span><span class="op">)</span> <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
+<span id="cb153-3"><a href="#cb153-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">or</span><span class="op">(</span><span class="ch">&#39;E&#39;</span>, <span class="ch">&#39;W&#39;</span><span class="op">)</span> <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
+<span id="cb153-4"><a href="#cb153-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
 
 </div></td>
 </tr>
 <tr class="even">
 <td><div>
 
-<div class="sourceCode" id="cb139"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a>e <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb139-2"><a href="#cb139-2" aria-hidden="true" tabindex="-1"></a>  A<span class="op">:</span> <span class="cf">let</span> a <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
-<span id="cb139-3"><a href="#cb139-3" aria-hidden="true" tabindex="-1"></a>  B<span class="op">:</span> <span class="cf">let</span> b <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
-<span id="cb139-4"><a href="#cb139-4" aria-hidden="true" tabindex="-1"></a>  C<span class="op">:</span> <span class="cf">let</span> c <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
-<span id="cb139-5"><a href="#cb139-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb154"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb154-1"><a href="#cb154-1" aria-hidden="true" tabindex="-1"></a>e <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb154-2"><a href="#cb154-2" aria-hidden="true" tabindex="-1"></a>  A<span class="op">:</span> <span class="cf">let</span> a <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
+<span id="cb154-3"><a href="#cb154-3" aria-hidden="true" tabindex="-1"></a>  B<span class="op">:</span> <span class="cf">let</span> b <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
+<span id="cb154-4"><a href="#cb154-4" aria-hidden="true" tabindex="-1"></a>  C<span class="op">:</span> <span class="cf">let</span> c <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
+<span id="cb154-5"><a href="#cb154-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
 
 </div></td>
 <td><div>
 
-<div class="sourceCode" id="cb140"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb140-1"><a href="#cb140-1" aria-hidden="true" tabindex="-1"></a>e <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb140-2"><a href="#cb140-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">or</span><span class="op">(</span></span>
-<span id="cb140-3"><a href="#cb140-3" aria-hidden="true" tabindex="-1"></a>    A<span class="op">:</span> <span class="cf">let</span> a,</span>
-<span id="cb140-4"><a href="#cb140-4" aria-hidden="true" tabindex="-1"></a>    B<span class="op">:</span> <span class="cf">let</span> b</span>
-<span id="cb140-5"><a href="#cb140-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span> <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
-<span id="cb140-6"><a href="#cb140-6" aria-hidden="true" tabindex="-1"></a>  C<span class="op">:</span> <span class="cf">let</span> c <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
-<span id="cb140-7"><a href="#cb140-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb155"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb155-1"><a href="#cb155-1" aria-hidden="true" tabindex="-1"></a>e <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb155-2"><a href="#cb155-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">or</span><span class="op">(</span></span>
+<span id="cb155-3"><a href="#cb155-3" aria-hidden="true" tabindex="-1"></a>    A<span class="op">:</span> <span class="cf">let</span> a,</span>
+<span id="cb155-4"><a href="#cb155-4" aria-hidden="true" tabindex="-1"></a>    B<span class="op">:</span> <span class="cf">let</span> b</span>
+<span id="cb155-5"><a href="#cb155-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span> <span class="op">=&gt;</span> f<span class="op">()</span>;</span>
+<span id="cb155-6"><a href="#cb155-6" aria-hidden="true" tabindex="-1"></a>  C<span class="op">:</span> <span class="cf">let</span> c <span class="op">=&gt;</span> g<span class="op">()</span>;</span>
+<span id="cb155-7"><a href="#cb155-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
 
 </div></td>
 </tr>
@@ -3420,48 +3628,48 @@ Structured Bindings<a href="#designator-support-for-structured-bindings" class="
 (i.e. <code class="sourceCode cpp"><span class="op">.</span>field_name</code>)
 to match on that field.</p>
 <div>
-<div class="sourceCode" id="cb141"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a>  <em>match-pattern</em></span>
-<span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a>      // ...</span>
-<span id="cb141-3"><a href="#cb141-3" aria-hidden="true" tabindex="-1"></a><span class="va">+     [ <em>designator-<code class="sourceCode default">0</code></em> : <em>pattern-<code class="sourceCode default">0</code></em> , … , <em>designator-<code class="sourceCode cpp">N</code></em> : <em>pattern-<code class="sourceCode cpp">N</code></em> ]</span></span></code></pre></div>
+<div class="sourceCode" id="cb156"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb156-1"><a href="#cb156-1" aria-hidden="true" tabindex="-1"></a>  <em>match-pattern</em></span>
+<span id="cb156-2"><a href="#cb156-2" aria-hidden="true" tabindex="-1"></a>      // ...</span>
+<span id="cb156-3"><a href="#cb156-3" aria-hidden="true" tabindex="-1"></a><span class="va">+     [ <em>designator-<code class="sourceCode default">0</code></em> : <em>pattern-<code class="sourceCode default">0</code></em> , … , <em>designator-<code class="sourceCode cpp">N</code></em> : <em>pattern-<code class="sourceCode cpp">N</code></em> ]</span></span></code></pre></div>
 </div>
 <div>
-<div class="sourceCode" id="cb142"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a>  <em>binding-pattern</em></span>
-<span id="cb142-2"><a href="#cb142-2" aria-hidden="true" tabindex="-1"></a>      // ...</span>
-<span id="cb142-3"><a href="#cb142-3" aria-hidden="true" tabindex="-1"></a><span class="va">+     [ <em>designator-<code class="sourceCode default">0</code></em> : <em>binding-pattern-<code class="sourceCode default">0</code></em> , … <em>designator-<code class="sourceCode cpp">N</code></em> : <em>binding-pattern-N</em> ]</span></span></code></pre></div>
+<div class="sourceCode" id="cb157"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb157-1"><a href="#cb157-1" aria-hidden="true" tabindex="-1"></a>  <em>binding-pattern</em></span>
+<span id="cb157-2"><a href="#cb157-2" aria-hidden="true" tabindex="-1"></a>      // ...</span>
+<span id="cb157-3"><a href="#cb157-3" aria-hidden="true" tabindex="-1"></a><span class="va">+     [ <em>designator-<code class="sourceCode default">0</code></em> : <em>binding-pattern-<code class="sourceCode default">0</code></em> , … <em>designator-<code class="sourceCode cpp">N</code></em> : <em>binding-pattern-N</em> ]</span></span></code></pre></div>
 </div>
 <p>Example:</p>
-<div class="sourceCode" id="cb143"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> scope <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb143-2"><a href="#cb143-2" aria-hidden="true" tabindex="-1"></a>    GlobalScope<span class="op">:</span> _ <span class="op">=&gt;</span> Cxx<span class="op">::</span>Scope<span class="op">::</span>global_<span class="op">()</span>;</span>
-<span id="cb143-3"><a href="#cb143-3" aria-hidden="true" tabindex="-1"></a>    NamespaceScope<span class="op">:</span> <span class="op">[.</span>fact<span class="op">:</span> <span class="cf">let</span> f<span class="op">]</span> <span class="op">=&gt;</span> Cxx<span class="op">::</span>Scope<span class="op">::</span>namespace_<span class="op">(</span>f<span class="op">)</span>;</span>
-<span id="cb143-4"><a href="#cb143-4" aria-hidden="true" tabindex="-1"></a>    ClassScope<span class="op">:</span> <span class="op">[.</span>fact<span class="op">:</span> <span class="cf">let</span> f<span class="op">]</span> <span class="op">=&gt;</span> Cxx<span class="op">::</span>Scope<span class="op">::</span>recordWithAccess<span class="op">(</span>f, access<span class="op">(</span>acs<span class="op">))</span>;</span>
-<span id="cb143-5"><a href="#cb143-5" aria-hidden="true" tabindex="-1"></a>    LocalScope<span class="op">:</span> <span class="op">[.</span>fact<span class="op">:</span> <span class="cf">let</span> f<span class="op">]</span> <span class="op">=&gt;</span> Cxx<span class="op">::</span>Scope<span class="op">::</span>local<span class="op">(</span>f<span class="op">)</span>;</span>
-<span id="cb143-6"><a href="#cb143-6" aria-hidden="true" tabindex="-1"></a><span class="co">//              ^^^^^^^^^^^^^^</span></span>
-<span id="cb143-7"><a href="#cb143-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb158"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb158-1"><a href="#cb158-1" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> scope <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb158-2"><a href="#cb158-2" aria-hidden="true" tabindex="-1"></a>    GlobalScope<span class="op">:</span> _ <span class="op">=&gt;</span> Cxx<span class="op">::</span>Scope<span class="op">::</span>global_<span class="op">()</span>;</span>
+<span id="cb158-3"><a href="#cb158-3" aria-hidden="true" tabindex="-1"></a>    NamespaceScope<span class="op">:</span> <span class="op">[.</span>fact<span class="op">:</span> <span class="cf">let</span> f<span class="op">]</span> <span class="op">=&gt;</span> Cxx<span class="op">::</span>Scope<span class="op">::</span>namespace_<span class="op">(</span>f<span class="op">)</span>;</span>
+<span id="cb158-4"><a href="#cb158-4" aria-hidden="true" tabindex="-1"></a>    ClassScope<span class="op">:</span> <span class="op">[.</span>fact<span class="op">:</span> <span class="cf">let</span> f<span class="op">]</span> <span class="op">=&gt;</span> Cxx<span class="op">::</span>Scope<span class="op">::</span>recordWithAccess<span class="op">(</span>f, access<span class="op">(</span>acs<span class="op">))</span>;</span>
+<span id="cb158-5"><a href="#cb158-5" aria-hidden="true" tabindex="-1"></a>    LocalScope<span class="op">:</span> <span class="op">[.</span>fact<span class="op">:</span> <span class="cf">let</span> f<span class="op">]</span> <span class="op">=&gt;</span> Cxx<span class="op">::</span>Scope<span class="op">::</span>local<span class="op">(</span>f<span class="op">)</span>;</span>
+<span id="cb158-6"><a href="#cb158-6" aria-hidden="true" tabindex="-1"></a><span class="co">//              ^^^^^^^^^^^^^^</span></span>
+<span id="cb158-7"><a href="#cb158-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span></code></pre></div>
 <h2 data-number="9.5" id="value-based-discriminators"><span class="header-section-number">9.5</span> Value-based discriminators<a href="#value-based-discriminators" class="self-link"></a></h2>
 <p>This would extend the alternative pattern to allow value-based
 discriminators.</p>
 <div>
-<div class="sourceCode" id="cb144"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb144-1"><a href="#cb144-1" aria-hidden="true" tabindex="-1"></a>  <em>discriminator</em>:</span>
-<span id="cb144-2"><a href="#cb144-2" aria-hidden="true" tabindex="-1"></a>      <em>type-id</em></span>
-<span id="cb144-3"><a href="#cb144-3" aria-hidden="true" tabindex="-1"></a>      <em>type-constraint</em></span>
-<span id="cb144-4"><a href="#cb144-4" aria-hidden="true" tabindex="-1"></a><span class="va">+     <em>constant-expression</em></span></span></code></pre></div>
+<div class="sourceCode" id="cb159"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb159-1"><a href="#cb159-1" aria-hidden="true" tabindex="-1"></a>  <em>discriminator</em>:</span>
+<span id="cb159-2"><a href="#cb159-2" aria-hidden="true" tabindex="-1"></a>      <em>type-id</em></span>
+<span id="cb159-3"><a href="#cb159-3" aria-hidden="true" tabindex="-1"></a>      <em>type-constraint</em></span>
+<span id="cb159-4"><a href="#cb159-4" aria-hidden="true" tabindex="-1"></a><span class="va">+     <em>constant-expression</em></span></span></code></pre></div>
 </div>
 <p>From <a href="#discussion-on-variant-like-types">Discussion on
 Variant-like Types</a>, the example of
 <code class="sourceCode cpp"><span class="kw">enum</span></code> values
 <code class="sourceCode cpp">value</code> and
 <code class="sourceCode cpp">error</code>:</p>
-<div class="sourceCode" id="cb145"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> <span class="kw">class</span> expected_state <span class="op">{</span> value, error <span class="op">}</span>;</span>
-<span id="cb145-2"><a href="#cb145-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-3"><a href="#cb145-3" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>expected<span class="op">&lt;</span><span class="dt">int</span>, parse_error<span class="op">&gt;</span> parse<span class="op">(</span>std<span class="op">::</span>string_view sv<span class="op">)</span>;</span>
-<span id="cb145-4"><a href="#cb145-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb145-5"><a href="#cb145-5" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb145-6"><a href="#cb145-6" aria-hidden="true" tabindex="-1"></a>  parse<span class="op">(</span>some_input<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb145-7"><a href="#cb145-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> <span class="kw">enum</span> std<span class="op">::</span>expected_state;</span>
-<span id="cb145-8"><a href="#cb145-8" aria-hidden="true" tabindex="-1"></a>    value<span class="op">:</span> <span class="cf">let</span> v <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb145-9"><a href="#cb145-9" aria-hidden="true" tabindex="-1"></a>    error<span class="op">:</span> <span class="cf">let</span> err <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb145-10"><a href="#cb145-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb145-11"><a href="#cb145-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb160"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb160-1"><a href="#cb160-1" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> <span class="kw">class</span> expected_state <span class="op">{</span> value, error <span class="op">}</span>;</span>
+<span id="cb160-2"><a href="#cb160-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb160-3"><a href="#cb160-3" aria-hidden="true" tabindex="-1"></a>std<span class="op">::</span>expected<span class="op">&lt;</span><span class="dt">int</span>, parse_error<span class="op">&gt;</span> parse<span class="op">(</span>std<span class="op">::</span>string_view sv<span class="op">)</span>;</span>
+<span id="cb160-4"><a href="#cb160-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb160-5"><a href="#cb160-5" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb160-6"><a href="#cb160-6" aria-hidden="true" tabindex="-1"></a>  parse<span class="op">(</span>some_input<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb160-7"><a href="#cb160-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> <span class="kw">enum</span> std<span class="op">::</span>expected_state;</span>
+<span id="cb160-8"><a href="#cb160-8" aria-hidden="true" tabindex="-1"></a>    value<span class="op">:</span> <span class="cf">let</span> v <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb160-9"><a href="#cb160-9" aria-hidden="true" tabindex="-1"></a>    error<span class="op">:</span> <span class="cf">let</span> err <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb160-10"><a href="#cb160-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb160-11"><a href="#cb160-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -3477,22 +3685,22 @@ Variant-like Types</a>, the example of
 <tr class="odd">
 <td><div>
 
-<div class="sourceCode" id="cb146"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb146-1"><a href="#cb146-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span>variant<span class="op">&lt;</span><span class="dt">int</span>, <span class="dt">int</span><span class="op">&gt;</span> v<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb146-2"><a href="#cb146-2" aria-hidden="true" tabindex="-1"></a>  v <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb146-3"><a href="#cb146-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span><span class="op">:</span> <span class="cf">let</span> first <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb146-4"><a href="#cb146-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span><span class="op">:</span> <span class="cf">let</span> second <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb146-5"><a href="#cb146-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb146-6"><a href="#cb146-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb161"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb161-1"><a href="#cb161-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span>variant<span class="op">&lt;</span><span class="dt">int</span>, <span class="dt">int</span><span class="op">&gt;</span> v<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb161-2"><a href="#cb161-2" aria-hidden="true" tabindex="-1"></a>  v <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb161-3"><a href="#cb161-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span><span class="op">:</span> <span class="cf">let</span> first <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb161-4"><a href="#cb161-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span><span class="op">:</span> <span class="cf">let</span> second <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb161-5"><a href="#cb161-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb161-6"><a href="#cb161-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 
 </div></td>
 <td><div>
 
-<div class="sourceCode" id="cb147"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span>expected<span class="op">&lt;</span><span class="dt">int</span>, <span class="dt">int</span><span class="op">&gt;</span> e<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb147-2"><a href="#cb147-2" aria-hidden="true" tabindex="-1"></a>  e <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb147-3"><a href="#cb147-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span><span class="op">:</span> <span class="cf">let</span> value <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb147-4"><a href="#cb147-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span><span class="op">:</span> <span class="cf">let</span> error <span class="op">=&gt;</span> <span class="co">// ...</span></span>
-<span id="cb147-5"><a href="#cb147-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb147-6"><a href="#cb147-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb162"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span>expected<span class="op">&lt;</span><span class="dt">int</span>, <span class="dt">int</span><span class="op">&gt;</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb162-2"><a href="#cb162-2" aria-hidden="true" tabindex="-1"></a>  e <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb162-3"><a href="#cb162-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span><span class="op">:</span> <span class="cf">let</span> value <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb162-4"><a href="#cb162-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span><span class="op">:</span> <span class="cf">let</span> error <span class="op">=&gt;</span> <span class="co">// ...</span></span>
+<span id="cb162-5"><a href="#cb162-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb162-6"><a href="#cb162-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 
 </div></td>
 </tr>
@@ -3539,14 +3747,13 @@ is implemented but <code class="sourceCode cpp"><em>type-constraint</em><span cl
 is not yet.</li>
 </ul></li>
 </ul></li>
-<li><strong>Semantic Anaylsis</strong>
+<li><strong>Semantic Analysis</strong>
 <ul>
 <li>Type deduction: <code class="sourceCode cpp"><span class="kw">auto</span> f<span class="op">(</span><span class="dt">char</span> c<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> c <span class="cf">match</span> <span class="op">{</span> <span class="ch">&#39;a&#39;</span> <span class="op">=&gt;</span> <span class="dv">0</span>; <span class="ch">&#39;b&#39;</span> <span class="op">=&gt;</span> <span class="dv">1</span>; <span class="op">}</span>; <span class="op">}</span></code></li>
 <li>AST Construction</li>
 <li>Type checking</li>
+<li>Inject bindings into the enclosing control statement. e.g. <code class="sourceCode cpp"><span class="cf">if</span> <span class="op">(</span>expr <span class="cf">match</span> <span class="op">[</span><span class="dv">0</span>, <span class="cf">let</span> x<span class="op">])</span> <span class="op">{</span> <span class="co">/* x available here */</span> <span class="op">}</span></code></li>
 <li><em>Missing</em>: Handling of templates</li>
-<li><em>Missing</em>: Inject bindings into the enclosing control
-statement. e.g. <code class="sourceCode cpp"><span class="cf">if</span> <span class="op">(</span>expr <span class="cf">match</span> <span class="op">[</span><span class="dv">0</span>, <span class="cf">let</span> x<span class="op">])</span> <span class="op">{</span> <span class="co">/* x available here */</span> <span class="op">}</span></code></li>
 <li><em>Missing</em>: More work needs to be done for jump-statement
 handlers
 (<code class="sourceCode cpp"><span class="cf">break</span></code>,
@@ -3562,9 +3769,11 @@ expressions: <span class="citation" data-cites="P2806R2">[<a href="https://wg21.
 <li><em>Missing</em>: Handling jump-statements, injecting a stack where
 necessary (template arguments, default arguments, etc)</li>
 <li><em>Missing</em>: For alternative pattern, <code class="sourceCode cpp"><em>type-id</em><span class="op">:</span> pattern</code>,
-currently it only implements polymorphic types using
+<code class="sourceCode cpp">std<span class="op">::</span>cast</code>
+specialization protocol is not implemented. Variant-like protocol and
+polymorphic types using
 <code class="sourceCode cpp"><span class="kw">dynamic_cast</span></code>
-under the hood.</li>
+under the hood are implemented.</li>
 </ul></li>
 <li><em>Missing</em>: Emitting actual code gen</li>
 </ul></li>
@@ -3615,14 +3824,14 @@ produces an error along the lines of <code class="sourceCode cpp"><span class="s
 The leading <code class="sourceCode cpp">_</code> takes us into pattern
 parsing, even though <code class="sourceCode cpp">_ <span class="op">+</span> <span class="dv">1</span></code>
 could be a valid expression.</p>
-<div class="sourceCode" id="cb148"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a>expr <span class="cf">match</span> <span class="op">{</span></span>
-<span id="cb148-2"><a href="#cb148-2" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">=&gt;</span> <span class="co">// wildcard pattern</span></span>
-<span id="cb148-3"><a href="#cb148-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>_ <span class="op">=&gt;</span> <span class="co">// dereference</span></span>
-<span id="cb148-4"><a href="#cb148-4" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">+</span> <span class="dv">1</span> <span class="op">=&gt;</span> <span class="co">// error: expected &#39;=&gt;&#39; after wildcard pattern</span></span>
-<span id="cb148-5"><a href="#cb148-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> <span class="op">=&gt;</span> <span class="co">// error: expected identifier or &#39;[&#39; after &#39;let&#39;</span></span>
-<span id="cb148-6"><a href="#cb148-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> x <span class="op">=&gt;</span> <span class="co">// let pattern</span></span>
-<span id="cb148-7"><a href="#cb148-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> <span class="op">[</span>x<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// SB pattern</span></span>
-<span id="cb148-8"><a href="#cb148-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb163"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb163-1"><a href="#cb163-1" aria-hidden="true" tabindex="-1"></a>expr <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb163-2"><a href="#cb163-2" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">=&gt;</span> <span class="co">// wildcard pattern</span></span>
+<span id="cb163-3"><a href="#cb163-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>_ <span class="op">=&gt;</span> <span class="co">// dereference</span></span>
+<span id="cb163-4"><a href="#cb163-4" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">+</span> <span class="dv">1</span> <span class="op">=&gt;</span> <span class="co">// error: expected &#39;=&gt;&#39; after wildcard pattern</span></span>
+<span id="cb163-5"><a href="#cb163-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> <span class="op">=&gt;</span> <span class="co">// error: expected identifier or &#39;[&#39; after &#39;let&#39;</span></span>
+<span id="cb163-6"><a href="#cb163-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> x <span class="op">=&gt;</span> <span class="co">// let pattern</span></span>
+<span id="cb163-7"><a href="#cb163-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">let</span> <span class="op">[</span>x<span class="op">]</span> <span class="op">=&gt;</span> <span class="co">// SB pattern</span></span>
+<span id="cb163-8"><a href="#cb163-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>Now, without parenthesized pattern, a
 <code class="sourceCode cpp"><span class="op">(</span></code> would take
 us into expression parsing. It was considered to drop the parenthesized
@@ -3646,8 +3855,8 @@ we don’t yet know whether the
 <code class="sourceCode cpp">T<span class="op">()</span></code> is a
 function type or a constructor call. In fact it changes based on what
 comes next.</p>
-<div class="sourceCode" id="cb149"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb149-1"><a href="#cb149-1" aria-hidden="true" tabindex="-1"></a><span class="op">(</span>T<span class="op">())</span> <span class="op">*</span> x  <span class="co">// T() is a function type.    Cast of *x to T()</span></span>
-<span id="cb149-2"><a href="#cb149-2" aria-hidden="true" tabindex="-1"></a><span class="op">(</span>T<span class="op">())</span> <span class="op">/</span> x  <span class="co">// T() is a constructor call. Same as T() / x</span></span></code></pre></div>
+<div class="sourceCode" id="cb164"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb164-1"><a href="#cb164-1" aria-hidden="true" tabindex="-1"></a><span class="op">(</span>T<span class="op">())</span> <span class="op">*</span> x  <span class="co">// T() is a function type.    Cast of *x to T()</span></span>
+<span id="cb164-2"><a href="#cb164-2" aria-hidden="true" tabindex="-1"></a><span class="op">(</span>T<span class="op">())</span> <span class="op">/</span> x  <span class="co">// T() is a constructor call. Same as T() / x</span></span></code></pre></div>
 <p>This involves blindly storing everything until the
 <code class="sourceCode cpp"><span class="op">)</span></code>,
 tentatively parsing what follows as a cast expression, then deciding
@@ -3689,6 +3898,12 @@ parenthesized expression of <code class="sourceCode cpp"><span class="op">(</spa
 <h1 data-number="11" id="acknowledgements"><span class="header-section-number">11</span> Acknowledgements<a href="#acknowledgements" class="self-link"></a></h1>
 <p>Thank you to all of the following folks</p>
 <ul>
+<li>Matt Godbolt, for helping to get the implementation online on
+Compiler Explorer.</li>
+<li>Folks on the LLVM Discord who helped with the Clang implementation.
+<ul>
+<li>Specific thanks to @Ætérnal, @cor3ntin, and @Aaron Ballman.</li>
+</ul></li>
 <li>Jens Maurer, for the time, effort, and guidance for wording
 work.</li>
 <li>Bruno Cardoso Lopes, specifically for his contributions to the
@@ -3754,6 +3969,9 @@ With No Name. <a href="https://wg21.link/p2169r4"><div class="csl-block">https:/
 <div id="ref-P2927R0" class="csl-entry" role="doc-biblioentry">
 [P2927R0] Gor Nishanov. 2023-10-15. Observing exceptions stored in
 exception_ptr. <a href="https://wg21.link/p2927r0"><div class="csl-block">https://wg21.link/p2927r0</div></a>
+</div>
+<div id="ref-P2971R2" class="csl-entry" role="doc-biblioentry">
+[P2971R2] Walter E Brown. 2024-05-21. Implication for C++. <a href="https://wg21.link/p2971r2"><div class="csl-block">https://wg21.link/p2971r2</div></a>
 </div>
 <div id="ref-P3332R0" class="csl-entry" role="doc-biblioentry">
 [P3332R0] Bjarne Stroustrup. 2024-06-18. A simpler notation for PM. <a href="https://wg21.link/p3332r0"><div class="csl-block">https://wg21.link/p3332r0</div></a>
