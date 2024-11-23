@@ -477,8 +477,8 @@ to handle <em>variant-like</em> types.</li>
 <h1 data-number="3" id="proposed-wording"><span class="header-section-number">3</span> Proposed Wording<a href="#proposed-wording" class="self-link"></a></h1>
 <p>Add a new section [variant.like] after <span>22.6.2
 <a href="https://wg21.link/variant.syn">[variant.syn]</a></span>:</p>
-<h2 class="unnumbered unlisted" id="concept-variant-like-variant.like">[22.6.2+1] Concept
-<em>variant-like</em> [variant.like]<a href="#concept-variant-like-variant.like" class="self-link"></a></h2>
+<h3 class="unnumbered unlisted" id="variant.like-concept-variant-like">22.6.2+1 [variant.like] Concept
+<em>variant-like</em><a href="#variant.like-concept-variant-like" class="self-link"></a></h3>
 <div>
 <div class="sourceCode" id="cb1"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T&gt;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   concept <em>variant-like</em> = <em>see below</em>;           // exposition only</span></span></code></pre></div>
@@ -494,8 +494,9 @@ specialization of <code class="sourceCode default">expected</code> or
 <p>Add a new member function <code class="sourceCode cpp">index</code>
 to <span>22.8.6.1
 <a href="https://wg21.link/expected.object.general">[expected.object.general]</a></span></p>
-<h2 class="unnumbered unlisted" id="general-expected.object.general">General <span>22.8.6.1
-<a href="https://wg21.link/expected.object.general">[expected.object.general]</a></span><a href="#general-expected.object.general" class="self-link"></a></h2>
+<h3 class="unnumbered unlisted" id="expected.object.general-general"><span>22.8.6.1
+<a href="https://wg21.link/expected.object.general">[expected.object.general]</a></span>
+General<a href="#expected.object.general-general" class="self-link"></a></h3>
 <div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>namespace std {</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  template&lt;class T, class E&gt;</span>
@@ -518,8 +519,9 @@ to <span>22.8.6.1
 <p>Add a new member function <code class="sourceCode cpp">index</code>
 to <span>22.8.6.6
 <a href="https://wg21.link/expected.object.obs">[expected.object.obs]</a></span></p>
-<h2 class="unnumbered unlisted" id="observers-expected.object.obs">Observers <span>22.8.6.6
-<a href="https://wg21.link/expected.object.obs">[expected.object.obs]</a></span><a href="#observers-expected.object.obs" class="self-link"></a></h2>
+<h3 class="unnumbered unlisted" id="expected.object.obs-observers"><span>22.8.6.6
+<a href="https://wg21.link/expected.object.obs">[expected.object.obs]</a></span>
+Observers<a href="#expected.object.obs-observers" class="self-link"></a></h3>
 <div>
 <div class="sourceCode" id="cb3"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span></code></pre></div>
 </div>
@@ -531,8 +533,9 @@ to <span>22.8.6.6
 <p>Add a new member function <code class="sourceCode cpp">index</code>
 to <span>22.8.7.1
 <a href="https://wg21.link/expected.void.general">[expected.void.general]</a></span></p>
-<h2 class="unnumbered unlisted" id="general-expected.void.general">General <span>22.8.7.1
-<a href="https://wg21.link/expected.void.general">[expected.void.general]</a></span><a href="#general-expected.void.general" class="self-link"></a></h2>
+<h3 class="unnumbered unlisted" id="expected.void.general-general"><span>22.8.7.1
+<a href="https://wg21.link/expected.void.general">[expected.void.general]</a></span>
+General<a href="#expected.void.general-general" class="self-link"></a></h3>
 <div>
 <div class="sourceCode" id="cb4"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>template&lt;class T, class E&gt; requires is_void_v&lt;T&gt;</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>class expected {</span>
@@ -551,8 +554,9 @@ to <span>22.8.7.1
 <p>Add a new member function <code class="sourceCode cpp">index</code>
 to <span>22.8.7.6
 <a href="https://wg21.link/expected.void.obs">[expected.void.obs]</a></span></p>
-<h2 class="unnumbered unlisted" id="observers-expected.void.obs">Observers <span>22.8.7.6
-<a href="https://wg21.link/expected.void.obs">[expected.void.obs]</a></span><a href="#observers-expected.void.obs" class="self-link"></a></h2>
+<h3 class="unnumbered unlisted" id="expected.void.obs-observers"><span>22.8.7.6
+<a href="https://wg21.link/expected.void.obs">[expected.void.obs]</a></span>
+Observers<a href="#expected.void.obs-observers" class="self-link"></a></h3>
 <div>
 <div class="sourceCode" id="cb5"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span></code></pre></div>
 </div>
@@ -563,8 +567,8 @@ to <span>22.8.7.6
 </div>
 <p>Add a new section [expected.asvariant] after <span>22.8.7.8
 <a href="https://wg21.link/expected.void.eq">[expected.void.eq]</a></span>:</p>
-<h2 class="unnumbered unlisted" id="variant-like-access-to-expected-expected.asvariant">[22.8.7.8+1]
-Variant-like access to expected [expected.asvariant]<a href="#variant-like-access-to-expected-expected.asvariant" class="self-link"></a></h2>
+<h3 class="unnumbered unlisted" id="expected.asvariant-variant-like-access-to-expected">22.8.7.8+1
+[expected.asvariant] Variant-like access to expected<a href="#expected.asvariant-variant-like-access-to-expected" class="self-link"></a></h3>
 <div>
 <div class="sourceCode" id="cb6"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, class E&gt;</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   struct variant_size&lt;expected&lt;T, E&gt;&gt; : integral_constant&lt;size_t, 2&gt; { };</span></span>

@@ -679,10 +679,10 @@ bindings). The pattern matches if
 <code class="sourceCode cpp">std<span class="op">::</span>forward_like<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span><em>subject</em><span class="op">)&gt;(*</span>__temp<span class="op">)</span></code>
 matches <em>subpattern</em>.</p>
 <h1 data-number="4" id="proposed-wording"><span class="header-section-number">4</span> Proposed Wording<a href="#proposed-wording" class="self-link"></a></h1>
-<h2 class="unnumbered unlisted" id="any.synop-header-any-synopsis"><span>22.7.2
+<h3 class="unnumbered unlisted" id="any.synop-header-any-synopsis"><span>22.7.2
 <a href="https://wg21.link/any.synop">[any.synop]</a></span> Header
 <code class="sourceCode cpp"><span class="op">&lt;</span>any<span class="op">&gt;</span></code>
-synopsis<a href="#any.synop-header-any-synopsis" class="self-link"></a></h2>
+synopsis<a href="#any.synop-header-any-synopsis" class="self-link"></a></h3>
 <div>
 <div class="sourceCode" id="cb9"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    T any_cast(const any&amp; operand);</span>
@@ -703,9 +703,9 @@ synopsis<a href="#any.synop-header-any-synopsis" class="self-link"></a></h2>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="va">+   T* try_cast(Any&amp;&amp; operand) noexcept;</span></span></code></pre></div>
 </div>
-<h2 class="unnumbered unlisted" id="any.nonmembers-non-member-functions"><span>22.7.5
+<h3 class="unnumbered unlisted" id="any.nonmembers-non-member-functions"><span>22.7.5
 <a href="https://wg21.link/any.nonmembers">[any.nonmembers]</a></span>
-Non-member functions<a href="#any.nonmembers-non-member-functions" class="self-link"></a></h2>
+Non-member functions<a href="#any.nonmembers-non-member-functions" class="self-link"></a></h3>
 <div>
 <div class="sourceCode" id="cb10"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   const T* try_cast(const Any&amp; operand) noexcept;</span></span>
