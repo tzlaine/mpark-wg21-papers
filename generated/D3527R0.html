@@ -486,7 +486,7 @@ to handle <em>variant-like</em> types.</li>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 A type <code class="sourceCode default">T</code> models and satisfies
-the exposition-only concept <em>tuple-like</em> if
+the exposition-only concept <em>variant-like</em> if
 <code class="sourceCode default">remove_cvref_t&lt;T&gt;</code> is a
 specialization of <code class="sourceCode default">expected</code> or
 <code class="sourceCode default">variant</code>.</p>
@@ -497,28 +497,23 @@ to <span>22.8.6.1
 <h2 class="unnumbered unlisted" id="general-expected.object.general">General <span>22.8.6.1
 <a href="https://wg21.link/expected.object.general">[expected.object.general]</a></span><a href="#general-expected.object.general" class="self-link"></a></h2>
 <div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>    // [expected.object.obs], observers</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    constexpr const T* operator-&gt;() const noexcept;</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    constexpr T* operator-&gt;() noexcept;</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    constexpr const T&amp; operator*() const &amp; noexcept;</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    constexpr T&amp; operator*() &amp; noexcept;</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    constexpr const T&amp;&amp; operator*() const &amp;&amp; noexcept;</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    constexpr T&amp;&amp; operator*() &amp;&amp; noexcept;</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    constexpr explicit operator bool() const noexcept;</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    constexpr bool has_value() const noexcept;</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    constexpr const T&amp; value() const &amp;;                                     // freestanding-deleted</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    constexpr T&amp; value() &amp;;                                                 // freestanding-deleted</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    constexpr const T&amp;&amp; value() const &amp;&amp;;                                   // freestanding-deleted</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    constexpr T&amp;&amp; value() &amp;&amp;;                                               // freestanding-deleted</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    constexpr const E&amp; error() const &amp; noexcept;</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    constexpr E&amp; error() &amp; noexcept;</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    constexpr const E&amp;&amp; error() const &amp;&amp; noexcept;</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    constexpr E&amp;&amp; error() &amp;&amp; noexcept;</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    template&lt;class U&gt; constexpr T value_or(U&amp;&amp;) const &amp;;</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    template&lt;class U&gt; constexpr T value_or(U&amp;&amp;) &amp;&amp;;</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) const &amp;;</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) &amp;&amp;;</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr size_t index() const noexcept;</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>namespace std {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  template&lt;class T, class E&gt;</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  class expected {</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  public:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    // [expected.object.obs], observers</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    template&lt;class U&gt; constexpr T value_or(U&amp;&amp;) const &amp;;</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    template&lt;class U&gt; constexpr T value_or(U&amp;&amp;) &amp;&amp;;</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) const &amp;;</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) &amp;&amp;;</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr size_t index() const noexcept;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  };</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <p>Add a new member function <code class="sourceCode cpp">index</code>
 to <span>22.8.6.6
@@ -530,10 +525,8 @@ to <span>22.8.6.6
 </div>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">26</a></span>
-<em>Effects</em>: If <code class="sourceCode default">has_value()</code>
-is <code class="sourceCode default">true</code> returns
-<code class="sourceCode default">0</code> otherwise
-<code class="sourceCode default">1</code>.</p>
+<em>Returns</em>:
+<code class="sourceCode default">has_value() ? 0 : 1</code>.</p>
 </div>
 <p>Add a new section [expected.asvariant] after <span>22.8.7.8
 <a href="https://wg21.link/expected.void.eq">[expected.void.eq]</a></span>:</p>
