@@ -528,18 +528,51 @@ to <span>22.8.6.6
 <em>Returns</em>:
 <code class="sourceCode default">has_value() ? 0 : 1</code>.</p>
 </div>
+<p>Add a new member function <code class="sourceCode cpp">index</code>
+to <span>22.8.7.1
+<a href="https://wg21.link/expected.void.general">[expected.void.general]</a></span></p>
+<h2 class="unnumbered unlisted" id="general-expected.void.general">General <span>22.8.7.1
+<a href="https://wg21.link/expected.void.general">[expected.void.general]</a></span><a href="#general-expected.void.general" class="self-link"></a></h2>
+<div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>template&lt;class T, class E&gt; requires is_void_v&lt;T&gt;</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>class expected {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>public:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  // [expected.void.obs], observers</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) const &amp;;</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) &amp;&amp;;</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>   ...</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a> };</span></code></pre></div>
+</div>
+<p>Add a new member function <code class="sourceCode cpp">index</code>
+to <span>22.8.7.6
+<a href="https://wg21.link/expected.void.obs">[expected.void.obs]</a></span></p>
+<h2 class="unnumbered unlisted" id="observers-expected.void.obs">Observers <span>22.8.7.6
+<a href="https://wg21.link/expected.void.obs">[expected.void.obs]</a></span><a href="#observers-expected.void.obs" class="self-link"></a></h2>
+<div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span></code></pre></div>
+</div>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">15</a></span>
+<em>Returns</em>:
+<code class="sourceCode default">has_value() ? 0 : 1</code>.</p>
+</div>
 <p>Add a new section [expected.asvariant] after <span>22.8.7.8
 <a href="https://wg21.link/expected.void.eq">[expected.void.eq]</a></span>:</p>
 <h2 class="unnumbered unlisted" id="variant-like-access-to-expected-expected.asvariant">[22.8.7.8+1]
 Variant-like access to expected [expected.asvariant]<a href="#variant-like-access-to-expected-expected.asvariant" class="self-link"></a></h2>
 <div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, class E&gt;</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   struct variant_size&lt;expected&lt;T, E&gt;&gt; : integral_constant&lt;size_t, 2&gt; { };</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   struct variant_alternative&lt;I, expected&lt;T, E&gt;&gt; {</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     using type = <em>see below</em> ;</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="va">+   };</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, class E&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   struct variant_size&lt;expected&lt;T, E&gt;&gt; : integral_constant&lt;size_t, 2&gt; { };</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   struct variant_alternative&lt;I, expected&lt;T, E&gt;&gt; {</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     using type = <em>see below</em> ;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="va">+   };</span></span></code></pre></div>
 </div>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
@@ -551,14 +584,14 @@ Variant-like access to expected [expected.asvariant]<a href="#variant-like-acces
 <code class="sourceCode default">E</code>.</p>
 </div>
 <div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp; get(expected&lt;T, E&gt;&amp; e);</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp;&amp; get(expected&lt;T, E&gt;&amp;&amp; e);</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr const variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp; get(const expected&lt;T, E&gt;&amp; e);</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr const variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp;&amp; get(const expected&lt;T, E&gt;&amp;&amp; e);</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp; get(expected&lt;T, E&gt;&amp; e);</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp;&amp; get(expected&lt;T, E&gt;&amp;&amp; e);</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr const variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp; get(const expected&lt;T, E&gt;&amp; e);</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr const variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp;&amp; get(const expected&lt;T, E&gt;&amp;&amp; e);</span></span></code></pre></div>
 </div>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
