@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-25" />
+  <meta name="dcterms.date" content="2024-11-27" />
   <title>Pattern Matching: Customization Point for Open Sum
 Types</title>
   <style>
@@ -429,7 +429,7 @@ Customization Point for Open Sum Types</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-25</td>
+    <td>2024-11-27</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -446,6 +446,7 @@ Customization Point for Open Sum Types</h1>
     <td style="vertical-align:top">Reply-to:</td>
     <td>
       Michael Park<br>&lt;<a href="mailto:mcypark@gmail.com" class="email">mcypark@gmail.com</a>&gt;<br>
+      Zach Laine<br>&lt;<a href="mailto:whatwasthataddress@gmail.com" class="email">whatwasthataddress@gmail.com</a>&gt;<br>
     </td>
   </tr>
 </table>
@@ -467,25 +468,19 @@ Matching<span></span></a></li>
 <li><a href="#how-does-pattern-matching-actually-use-this" id="toc-how-does-pattern-matching-actually-use-this"><span class="toc-section-number">3.1</span> How does pattern matching actually
 use this?<span></span></a></li>
 </ul></li>
-<li><a href="#proposed-wording" id="toc-proposed-wording"><span class="toc-section-number">4</span> Proposed Wording<span></span></a>
-<ul>
-<li><a href="#insert-after-utility.unreachable-in-header-utilities-synopsis-utility.syn" id="toc-insert-after-utility.unreachable-in-header-utilities-synopsis-utility.syn"><span class="toc-section-number">4.0.1</span> Insert after <code class="sourceCode cpp"><span class="op">[</span>utility<span class="op">.</span>unreachable<span class="op">]</span></code>
-in header <code class="sourceCode cpp"><span class="op">&lt;</span>utilities<span class="op">&gt;</span></code>
-synopsis (<span>22.2.1
-<span>[utility.syn]</span></span>):<span></span></a></li>
-<li><a href="#append-to-utility" id="toc-append-to-utility"><span class="toc-section-number">4.0.2</span> Append to <span>22.2
-<span>[utility]</span></span>:<span></span></a></li>
-</ul></li>
+<li><a href="#proposed-wording" id="toc-proposed-wording"><span class="toc-section-number">4</span> Proposed
+Wording<span></span></a></li>
 <li><a href="#design-alternatives" id="toc-design-alternatives"><span class="toc-section-number">5</span> Design Alternatives<span></span></a>
 <ul>
 <li><a href="#overload-any_cast" id="toc-overload-any_cast"><span class="toc-section-number">5.1</span> Overload
 <code class="sourceCode cpp">any_cast</code><span></span></a></li>
 <li><a href="#parameters-as-pointers" id="toc-parameters-as-pointers"><span class="toc-section-number">5.2</span> Parameters as
 Pointers<span></span></a></li>
-<li><a href="#stdhash-like-approach" id="toc-stdhash-like-approach"><span class="toc-section-number">5.3</span>
-<code class="sourceCode cpp">std<span class="op">::</span>hash</code>
-Like Approach<span></span></a></li>
-<li><a href="#as-a-cpo" id="toc-as-a-cpo"><span class="toc-section-number">5.4</span> As a CPO<span></span></a></li>
+<li><a href="#use-a-stdhash-like-approach" id="toc-use-a-stdhash-like-approach"><span class="toc-section-number">5.3</span> Use a
+<code class="sourceCode cpp">std<span class="op">::</span>hash</code>-like
+Approach<span></span></a></li>
+<li><a href="#create-a-try_cast-cpo" id="toc-create-a-try_cast-cpo"><span class="toc-section-number">5.4</span> Create a
+<code class="sourceCode cpp">try_cast</code> CPO<span></span></a></li>
 </ul></li>
 <li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">6</span> References<span></span></a></li>
 </ul>
@@ -561,7 +556,7 @@ variant helpers: <code class="sourceCode cpp">variant_size</code>,
 <code class="sourceCode cpp">variant_alternative</code>,
 <code class="sourceCode cpp">get</code>, and
 <code class="sourceCode cpp">index</code>.</p>
-<p>For open sum types however, there is no such existing facility.
+<p>However, for open sum types, there is no such existing facility.
 <code class="sourceCode cpp">std<span class="op">::</span>any</code> and
 <code class="sourceCode cpp">std<span class="op">::</span>exception_ptr</code>
 are examples of such types.</p>
@@ -671,94 +666,92 @@ considers the following 3 cases:</p>
 <li>Tuple-like</li>
 <li>Aggregate types</li>
 </ol>
-<p>The cast protocol is the only one that is missing today.</p>
-<p>The proposal is to add overloads of
-<code class="sourceCode cpp">try_cast</code> like so:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> std <span class="op">{</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T, same_as<span class="op">&lt;</span>any<span class="op">&gt;</span> Any<span class="op">&gt;</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> T<span class="op">*</span> try_cast<span class="op">(</span><span class="kw">const</span> Any<span class="op">&amp;</span> a<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">{</span> <span class="cf">return</span> any_cast<span class="op">&lt;</span>T<span class="op">&gt;(&amp;</span>a<span class="op">)</span>; <span class="op">}</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T, same_as<span class="op">&lt;</span>any<span class="op">&gt;</span> Any<span class="op">&gt;</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  T<span class="op">*</span> try_cast<span class="op">(</span>Any<span class="op">&amp;</span> a<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">{</span> <span class="cf">return</span> any_cast<span class="op">&lt;</span>T<span class="op">&gt;(&amp;</span>a<span class="op">)</span>; <span class="op">}</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T, same_as<span class="op">&lt;</span>any<span class="op">&gt;</span> Any<span class="op">&gt;</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  T<span class="op">*</span> try_cast<span class="op">(</span>Any<span class="op">&amp;&amp;</span> a<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">{</span> <span class="cf">return</span> any_cast<span class="op">&lt;</span>T<span class="op">&gt;(&amp;</span>a<span class="op">)</span>; <span class="op">}</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T<span class="op">&gt;</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> T<span class="op">*</span> try_cast<span class="op">(</span><span class="kw">const</span> exception_ptr<span class="op">&amp;</span> p<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> exception_ptr_cast<span class="op">&lt;</span>T<span class="op">&gt;(</span>p<span class="op">)</span>; <span class="co">// P2927R2</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>The <code class="sourceCode cpp">same_as<span class="op">&lt;</span>any<span class="op">&gt;</span></code>
-constraint is present because <code class="sourceCode cpp">any</code> is
-implicitly convertible from virtually anything. If it were to simply
-take a <code class="sourceCode cpp"><span class="kw">const</span> any<span class="op">&amp;</span> a</code>,
-that becomes greedy, and accept arguments that we do not want it to.</p>
-<p>This approach also allows for user-defined types to add its own
-overload without having to open the
-<code class="sourceCode cpp">std</code> namespace:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ns <span class="op">{</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">struct</span> Widget <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span>;</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T<span class="op">&gt;</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> T<span class="op">*</span> try_cast<span class="op">(</span><span class="kw">const</span> Widget<span class="op">&amp;</span> w<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="co">// ...</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The cast protocol is the only one that needs library support for
+<code class="sourceCode cpp">std</code> entities to benefit from it.</p>
+<p>The proposal is to add <code class="sourceCode cpp">try_cast</code>
+overloads that handle casts of
+<code class="sourceCode cpp">std<span class="op">::</span>any</code>
+using <code class="sourceCode cpp">std<span class="op">::</span>any_cast</code>, and
+casts of <code class="sourceCode cpp">std<span class="op">::</span>exception_ptr</code>
+using <code class="sourceCode cpp">std<span class="op">::</span>exception_ptr_cast</code>
+from P2927R2.</p>
+<p>This works because the language feature itself uses
+<code class="sourceCode cpp">try_cast</code> if available. Casts of
+user-defined types using calls to
+<code class="sourceCode cpp">try_cast</code> found via ADL, will also
+work, such as:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ns <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">struct</span> Widget <span class="op">{</span> <span class="co">/* ... */</span> <span class="op">}</span>;</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T<span class="op">&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> T<span class="op">*</span> try_cast<span class="op">(</span><span class="kw">const</span> Widget<span class="op">&amp;</span> w<span class="op">)</span> <span class="kw">noexcept</span> <span class="op">{</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="co">// ...</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span>;</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <h2 data-number="3.1" id="how-does-pattern-matching-actually-use-this"><span class="header-section-number">3.1</span> How does pattern matching
 actually use this?<a href="#how-does-pattern-matching-actually-use-this" class="self-link"></a></h2>
 <p>Given an example like:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><em>subject</em> match <span class="op">{</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <em>type</em><span class="op">:</span> <em>subpattern</em> <span class="op">=&gt;</span> <span class="co">// ...;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">=&gt;</span> <span class="co">// ...;</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><em>subject</em> match <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <em>type</em><span class="op">:</span> <em>subpattern</em> <span class="op">=&gt;</span> <span class="co">// ...;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  _ <span class="op">=&gt;</span> <span class="co">// ...;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
 <p>Conceptually: <code class="sourceCode cpp">try_cast<span class="op">&lt;</span><em>type</em><span class="op">&gt;(</span><em>subject</em><span class="op">)</span></code>
 is invoked, which returns an optional result that can be tested and
 dereferenced to match the <em>subpattern</em>.</p>
-<p>More precisely: Let the result of <code class="sourceCode cpp">try_cast<span class="op">&lt;</span><em>type</em><span class="op">&gt;(</span><em>subject</em><span class="op">)</span></code>
-be <code class="sourceCode cpp">__temp</code> where
-<code class="sourceCode cpp">try_cast</code> is looked up by ADL-only
-(same as <code class="sourceCode cpp">get</code> for structured
-bindings). The pattern matches if
-<code class="sourceCode cpp">__temp</code> contextually converts to
+<p>More precisely: Let <code class="sourceCode cpp">E</code> be <code class="sourceCode cpp">try_cast<span class="op">&lt;</span><em>type</em><span class="op">&gt;(</span><em>subject</em><span class="op">)</span></code>.
+The call to <code class="sourceCode cpp">try_cast</code> is done using
+ADL-only lookup, just as is done with calls to
+<code class="sourceCode cpp">get</code> for structured bindings (see
+<span>9.6
+<a href="https://wg21.link/dcl.struct.bind">[dcl.struct.bind]</a></span>).</p>
+<p>The match is well-formed if and only if:</p>
+<ul>
+<li><code class="sourceCode cpp">E</code> is well-formed;</li>
+<li><code class="sourceCode cpp">E</code> is contextually convertible to
+<code class="sourceCode cpp"><span class="dt">bool</span></code>;
+and</li>
+<li><code class="sourceCode cpp">E</code> is dereferencable.</li>
+</ul>
+<p>A well-formed match succeeds if and only if
+<code class="sourceCode cpp">E</code> contextually converts to
 <code class="sourceCode cpp"><span class="kw">true</span></code> and
-<code class="sourceCode cpp">std<span class="op">::</span>forward_like<span class="op">&lt;</span><span class="kw">decltype</span><span class="op">(</span><em>subject</em><span class="op">)&gt;(*</span>__temp<span class="op">)</span></code>
-matches <em>subpattern</em>.</p>
+<code class="sourceCode cpp"><span class="op">*</span>E</code> matches
+<em>subpattern</em>.</p>
 <h1 data-number="4" id="proposed-wording"><span class="header-section-number">4</span> Proposed Wording<a href="#proposed-wording" class="self-link"></a></h1>
 <h3 class="unnumbered unlisted" id="any.synop-header-any-synopsis"><span>22.7.2
 <a href="https://wg21.link/any.synop">[any.synop]</a></span> Header
 <code class="sourceCode cpp"><span class="op">&lt;</span>any<span class="op">&gt;</span></code>
 synopsis<a href="#any.synop-header-any-synopsis" class="self-link"></a></h3>
 <div>
-<div class="sourceCode" id="cb9"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    T any_cast(const any&amp; operand);</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    T any_cast(any&amp; operand);</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    T any_cast(any&amp;&amp; operand);</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    const T* any_cast(const any* operand) noexcept;</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    T* any_cast(any* operand) noexcept;</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="va">+   const T* try_cast(const Any&amp; operand) noexcept;</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="va">+   T* try_cast(Any&amp; operand) noexcept;</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="va">+   T* try_cast(Any&amp;&amp; operand) noexcept;</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    T any_cast(const any&amp; operand);</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    T any_cast(any&amp; operand);</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    T any_cast(any&amp;&amp; operand);</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    const T* any_cast(const any* operand) noexcept;</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  template&lt;class T&gt;</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    T* any_cast(any* operand) noexcept;</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="va">+   const T* try_cast(const Any&amp; operand) noexcept;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="va">+   T* try_cast(Any&amp; operand) noexcept;</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="va">+   T* try_cast(Any&amp;&amp; operand) noexcept;</span></span></code></pre></div>
 </div>
 <h3 class="unnumbered unlisted" id="any.nonmembers-non-member-functions"><span>22.7.5
 <a href="https://wg21.link/any.nonmembers">[any.nonmembers]</a></span>
 Non-member functions<a href="#any.nonmembers-non-member-functions" class="self-link"></a></h3>
 <div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   const T* try_cast(const Any&amp; operand) noexcept;</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="va">+   T* try_cast(Any&amp; operand) noexcept;</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   T* try_cast(Any&amp;&amp; operand) noexcept;</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   const T* try_cast(const Any&amp; operand) noexcept;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="va">+   T* try_cast(Any&amp; operand) noexcept;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, same_as&lt;any&gt; Any&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   T* try_cast(Any&amp;&amp; operand) noexcept;</span></span></code></pre></div>
 </div>
 <div class="add" style="color: #006e28">
 
@@ -771,81 +764,39 @@ Non-member functions<a href="#any.nonmembers-non-member-functions" class="self-l
 </blockquote>
 
 </div>
-<h3 data-number="4.0.1" id="insert-after-utility.unreachable-in-header-utilities-synopsis-utility.syn"><span class="header-section-number">4.0.1</span> Insert after <code class="sourceCode cpp"><span class="op">[</span>utility<span class="op">.</span>unreachable<span class="op">]</span></code>
-in header <code class="sourceCode cpp"><span class="op">&lt;</span>utilities<span class="op">&gt;</span></code>
-synopsis (<span>22.2.1
-<a href="https://wg21.link/utility.syn">[utility.syn]</a></span>):<a href="#insert-after-utility.unreachable-in-header-utilities-synopsis-utility.syn" class="self-link"></a></h3>
+<h3 class="unnumbered unlisted" id="exception.syn-header-exception-synopsis"><span>17.9.2
+<a href="https://wg21.link/exception.syn">[exception.syn]</a></span>
+Header <code class="sourceCode cpp"><span class="op">&lt;</span>exception<span class="op">&gt;</span></code>
+synopsis<a href="#exception.syn-header-exception-synopsis" class="self-link"></a></h3>
 <div>
-<div class="sourceCode" id="cb11"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ // [utility.try_cast], `try_cast`</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T&gt;</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="va">+   requires same_as&lt;T, remove_volatile_t&lt;T&gt;&gt;</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="va">+     constexpr <em>unspecified</em> try_cast = <em>unspecified</em>;</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>  exception_ptr current_exception() noexcept;</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  [[noreturn]] void rethrow_exception(exception_ptr p);</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  template &lt;class E&gt;</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    const E* exception_ptr_cast(const exception_ptr&amp; p) noexcept;</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  template &lt;class T&gt; [[noreturn]] void throw_with_nested(T&amp;&amp; t);</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class E&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="va">+   const E* try_cast(const exception_ptr&amp; p) noexcept;</span></span></code></pre></div>
 </div>
-<h3 data-number="4.0.2" id="append-to-utility"><span class="header-section-number">4.0.2</span> Append to <span>22.2
-<a href="https://wg21.link/utility">[utility]</a></span>:<a href="#append-to-utility" class="self-link"></a></h3>
+<h3 class="unnumbered unlisted" id="propagation-exception-propagation"><span>17.9.7
+<a href="https://wg21.link/propagation">[propagation]</a></span>
+Exception propagation<a href="#propagation-exception-propagation" class="self-link"></a></h3>
+<div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class E&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   const E* try_cast(const exception_ptr&amp; p) noexcept;</span></span></code></pre></div>
+</div>
 <div class="add" style="color: #006e28">
-<p>???.?.? <code class="sourceCode default">try_cast</code>
-[utility.try_cast]</p>
-<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-The name <code class="sourceCode default">try_cast</code> denotes a
-customization point object ([customization.point.object]).</p>
-<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
-Given a subexpression <code class="sourceCode default">E</code> with
-type <code class="sourceCode default">U</code>, let
-<code class="sourceCode default">u</code> be an lvalue that denotes the
-reified object for <code class="sourceCode default">E</code>. Then:</p>
-<ul>
-<li><p><span class="marginalizedparent"><a class="marginalized">(2.1)</a></span> If
-<code class="sourceCode default">E</code> is an rvalue,
-<code class="sourceCode default">try_cast(E)</code> is
-ill-formed.</p></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(2.2)</a></span>
-Otherwise, if <code class="sourceCode default">same_as&lt;remove_cvref_t&lt;U&gt;, any&gt;</code>
-is <code class="sourceCode default">true</code> ([any]), then:</p>
-<ul>
-<li><p><span class="marginalizedparent"><a class="marginalized">(2.2.1)</a></span> If
-<code class="sourceCode default">same_as&lt;remove_const_t&lt;T&gt;, void&gt;</code>,
-<code class="sourceCode default">try_cast(E)</code> is
-ill-formed.</p></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(2.2.2)</a></span>
-Otherwise, <code class="sourceCode default">try_cast(E)</code> is
-expression-equivalent to
-<code class="sourceCode default">any_cast&lt;T&gt;(&amp;u)</code>.</p></li>
-</ul></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(2.3)</a></span>
-Otherwise, if <code class="sourceCode default">same_as&lt;remove_cvref_t&lt;U&gt;, exception_ptr&gt;</code>
-is <code class="sourceCode default">true</code> ([propagation]),
-then:</p>
-<ul>
-<li><p><span class="marginalizedparent"><a class="marginalized">(2.3.1)</a></span> If
-<code class="sourceCode default">is_const_v(T)</code> is
-<code class="sourceCode default">false</code>,
-<code class="sourceCode default">try_cast(E)</code> is
-ill-formed.</p></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(2.3.2)</a></span>
-Otherwise, <code class="sourceCode default">try_cast(E)</code> is
-expression-equivalent to <code class="sourceCode default">exception_ptr_cast&lt;T&gt;(&amp;u)</code>.</p></li>
-</ul></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(2.4)</a></span>
-Otherwise, if <code class="sourceCode default">U</code> is a class type
-and <code class="sourceCode default">auto(try_cast(t))</code> is a valid
-expression whose type is <code class="sourceCode default">T *</code>
-where the meaning of <code class="sourceCode default">try_cast</code> is
-established as-if by performing argument-dependent lookup only
-([basic.lookup.argdep]), then
-<code class="sourceCode default">try_cast(E)</code> is
-expression-equivalent to that expression.</p></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(2.5)</a></span>
-Otherwise, <code class="sourceCode default">try_cast(E)</code> is
-ill-formed.</p></li>
-</ul>
-<p><span class="marginalizedparent"><a class="marginalized">(2.6)</a></span>
-[Note 1: Whenever <code class="sourceCode default">try_cast(E)</code> is
-a valid expression, its type is
-<code class="sourceCode default">T *</code>. — end note]</p>
-<p><span class="marginalizedparent"><a class="marginalized">(2.7)</a></span>
-[Note 2: <code class="sourceCode default">T *</code> may be a pointer to
-<code class="sourceCode default">const</code>. — end note]</p>
+
+<blockquote>
+<p><em>Mandates</em>: <code class="sourceCode default">E</code> is a
+<em>cv</em>-unqualified complete object type.
+<code class="sourceCode default">E</code> is not an array type.
+<code class="sourceCode default">E</code> is not a pointer or
+pointer-to-member type.</p>
+<p><em>Returns</em>:
+<code class="sourceCode default">exception_ptr_cast&lt;E&gt;(p)</code></p>
+</blockquote>
+
 </div>
 <h1 data-number="5" id="design-alternatives"><span class="header-section-number">5</span> Design Alternatives<a href="#design-alternatives" class="self-link"></a></h1>
 <h2 data-number="5.1" id="overload-any_cast"><span class="header-section-number">5.1</span> Overload
@@ -881,11 +832,12 @@ from anything problem:</p>
 <p>This solves the problem of having to specify <code class="sourceCode cpp">same_as<span class="op">&lt;</span>any<span class="op">&gt;</span></code>
 constraint, but it makes the rest of the overloads less obvious and
 familiar.</p>
-<h2 data-number="5.3" id="stdhash-like-approach"><span class="header-section-number">5.3</span>
-<code class="sourceCode cpp">std<span class="op">::</span>hash</code>
-Like Approach<a href="#stdhash-like-approach" class="self-link"></a></h2>
+<h2 data-number="5.3" id="use-a-stdhash-like-approach"><span class="header-section-number">5.3</span> Use a
+<code class="sourceCode cpp">std<span class="op">::</span>hash</code>-like
+Approach<a href="#use-a-stdhash-like-approach" class="self-link"></a></h2>
 <p>This approach is to make <code class="sourceCode cpp">try_cast</code>
-be a class template that users specialize.</p>
+be a class template that users specialize, rather than an overload
+set.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> std <span class="op">{</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span><span class="op">&gt;</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">struct</span> try_cast; <span class="co">// undefined</span></span>
@@ -920,12 +872,25 @@ the specialization.</li>
 <li>The API becomes <code class="sourceCode cpp">std<span class="op">::</span>try_cast<span class="op">&lt;</span>From<span class="op">&gt;::</span>to<span class="op">&lt;</span>To<span class="op">&gt;(</span>from<span class="op">)</span></code>,
 compared to the proposed API which would be simply <code class="sourceCode cpp">try_cast<span class="op">&lt;</span>To<span class="op">&gt;(</span>from<span class="op">)</span></code>.</li>
 </ol>
-<h2 data-number="5.4" id="as-a-cpo"><span class="header-section-number">5.4</span> As a CPO<a href="#as-a-cpo" class="self-link"></a></h2>
-<p>This approach would create a CPO called
-<code class="sourceCode cpp">try_cast</code>, define as follows. First,
-if any call to it tries all the overloads of
-<code class="sourceCode cpp">try_cast</code> in the wording above, then
-it tries to call try_cast</p>
+<h2 data-number="5.4" id="create-a-try_cast-cpo"><span class="header-section-number">5.4</span> Create a
+<code class="sourceCode cpp">try_cast</code> CPO<a href="#create-a-try_cast-cpo" class="self-link"></a></h2>
+<p>This approach was seriously considered by the authors, but discarded.
+We wrote wording for it and everything. While it may be useful for users
+in general, it is a terrible fit for use by a language feature. The CPO
+would have to live in a particular header. That header would then need
+to be included wherever a
+<code class="sourceCode cpp">type<span class="op">:</span></code>
+pattern was applied to an open sum type.</p>
+<p>In the general case, the user would have no obvious way of noticing
+that this requirement was not met. They would just get a diagnostic
+telling them to
+<code class="sourceCode cpp"><span class="pp">#include</span></code> the
+right header. Users already have to deal with this occasionally when the
+compiler informs them that they forgot to include <code class="sourceCode cpp"><span class="op">&lt;</span>initializer_list<span class="op">&gt;</span></code>.</p>
+<p>Note that the tuple protocol uses direct calls to the overloads that
+it requires for producing structured bindings, and this decision is in
+line with that. In any case, the decision not to use a CPO is already
+made; it’s part of the language feature.</p>
 <h1 data-number="6" id="bibliography"><span class="header-section-number">6</span> References<a href="#bibliography" class="self-link"></a></h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="1" role="doc-bibliography">
 <div id="ref-P1371R3" class="csl-entry" role="doc-biblioentry">
