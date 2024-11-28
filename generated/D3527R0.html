@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-23" />
+  <meta name="dcterms.date" content="2024-11-27" />
   <title>Pattern Matching: *variant-like* and `std::expected`</title>
   <style>
       code{white-space: pre-wrap;}
@@ -428,7 +428,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-23</td>
+    <td>2024-11-27</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -445,6 +445,7 @@ code.sourceCode > span { display: inline; }
     <td style="vertical-align:top">Reply-to:</td>
     <td>
       Michael Park<br>&lt;<a href="mailto:mcypark@gmail.com" class="email">mcypark@gmail.com</a>&gt;<br>
+      Zach Laine<br>&lt;<a href="mailto:whatwasthataddress@gmail.com" class="email">whatwasthataddress@gmail.com</a>&gt;<br>
     </td>
   </tr>
 </table>
@@ -453,36 +454,174 @@ code.sourceCode > span { display: inline; }
 <div id="TOC" role="doc-toc">
 <h1 id="toctitle">Contents</h1>
 <ul>
-<li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction<span></span></a></li>
-<li><a href="#motivation-and-scope" id="toc-motivation-and-scope"><span class="toc-section-number">2</span> Motivation and
-Scope<span></span></a></li>
+<li><a href="#motivation-and-scope" id="toc-motivation-and-scope"><span class="toc-section-number">1</span> Motivation and
+Scope<span></span></a>
+<ul>
+<li><a href="#the-variant-protocol" id="toc-the-variant-protocol"><span class="toc-section-number">1.1</span> The Variant
+Protocol<span></span></a></li>
+</ul></li>
+<li><a href="#design" id="toc-design"><span class="toc-section-number">2</span> Design<span></span></a>
+<ul>
+<li><a href="#option-1-an-explicit-list-of-enabled-templates" id="toc-option-1-an-explicit-list-of-enabled-templates"><span class="toc-section-number">2.1</span> Option 1: An Explicit List of
+Enabled Templates<span></span></a></li>
+<li><a href="#option-2-a-more-complicated-more-general-concept" id="toc-option-2-a-more-complicated-more-general-concept"><span class="toc-section-number">2.2</span> Option 2: A More Complicated, More
+General Concept<span></span></a></li>
+<li><a href="#modifying-stdvisit" id="toc-modifying-stdvisit"><span class="toc-section-number">2.3</span> Modifying
+<code class="sourceCode cpp">std<span class="op">::</span>visit</code><span></span></a></li>
+</ul></li>
 <li><a href="#proposed-wording" id="toc-proposed-wording"><span class="toc-section-number">3</span> Proposed
 Wording<span></span></a></li>
 <li><a href="#design-alternatives" id="toc-design-alternatives"><span class="toc-section-number">4</span> Design
 Alternatives<span></span></a></li>
 <li><a href="#implementation-experience" id="toc-implementation-experience"><span class="toc-section-number">5</span> Implementation
 Experience<span></span></a></li>
+<li><a href="#bibliography" id="toc-bibliography"><span class="toc-section-number">6</span> References<span></span></a></li>
 </ul>
 </div>
-<h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
-<h1 data-number="2" id="motivation-and-scope"><span class="header-section-number">2</span> Motivation and Scope<a href="#motivation-and-scope" class="self-link"></a></h1>
+<h1 data-number="1" id="motivation-and-scope"><span class="header-section-number">1</span> Motivation and Scope<a href="#motivation-and-scope" class="self-link"></a></h1>
+<p><span class="citation" data-cites="P2688R3">[<a href="https://wg21.link/p2688r3" role="doc-biblioref">P2688R3</a>]</span> introduces pattern matching for
+C++, including handling of
+<code class="sourceCode cpp">std<span class="op">::</span>variant</code>s.
+For example:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> v <span class="op">=</span> std<span class="op">::</span>variant<span class="op">&lt;</span><span class="dt">int32_t</span>, <span class="dt">int64_t</span>, <span class="dt">float</span>, <span class="dt">double</span><span class="op">&gt;{</span><span class="co">/* ... */</span><span class="op">}</span>;</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>v match <span class="op">{</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int32_t</span><span class="op">:</span> let i32 <span class="op">=&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>print<span class="op">(</span><span class="st">&quot;got int32: {}&quot;</span>, i32<span class="op">)</span>;</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int64_t</span><span class="op">:</span> let i64 <span class="op">=&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>print<span class="op">(</span><span class="st">&quot;got int64: {}&quot;</span>, i64<span class="op">)</span>;</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">float</span><span class="op">:</span> let f <span class="op">=&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>print<span class="op">(</span><span class="st">&quot;got float: {}&quot;</span>, f<span class="op">)</span>;</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">double</span><span class="op">:</span> let d <span class="op">=&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>print<span class="op">(</span><span class="st">&quot;got double: {}&quot;</span>, d<span class="op">)</span>;</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<p>However, there is an unsupported type in the standard that is
+variant-like but is not covered by <span class="citation" data-cites="P2688R3">[<a href="https://wg21.link/p2688r3" role="doc-biblioref">P2688R3</a>]</span> without explicit library
+support. That type is <code class="sourceCode cpp">std<span class="op">::</span>expected</code>.</p>
+<p>This paper adds library facilities that allow <code class="sourceCode cpp">std<span class="op">::</span>expected</code> to
+conform to the notion of variant-like used in the pattern matching core
+wording. In order to accomplish this, we need to do three things:</p>
 <ol type="1">
-<li>Introduce the <em>variant-like</em> concept.</li>
+<li>Introduce the <em>variant-like</em> exposition-only concept.</li>
 <li>Add <code class="sourceCode cpp">std<span class="op">::</span>expected</code> to
 the <em>variant-like</em> concept.</li>
 <li>Modify
 <code class="sourceCode cpp">std<span class="op">::</span>visit</code>
-to handle <em>variant-like</em> types.</li>
+to handle <em>variant-like</em> types (optional).</li>
 </ol>
+<p>This has the side effect that users will now be able to use
+<code class="sourceCode cpp">std<span class="op">::</span>visit</code>
+in a generic context to visit alternatives of both
+<code class="sourceCode cpp">std<span class="op">::</span>variant</code>
+(as is the status quo) and <code class="sourceCode cpp">std<span class="op">::</span>expected</code> (via
+the changes in this paper).</p>
+<h2 data-number="1.1" id="the-variant-protocol"><span class="header-section-number">1.1</span> The Variant Protocol<a href="#the-variant-protocol" class="self-link"></a></h2>
+<p>The language semantics for pattern matching (<span class="citation" data-cites="P2688R3">[<a href="https://wg21.link/p2688r3" role="doc-biblioref">P2688R3</a>]</span>) include the notion of a
+“variant protocol”. This is analogous to the tuple protocol used for
+tuple-like (including aggregate) types. The tuple protocol is used in
+defining the behavior of structured bindings and pattern matching
+both.</p>
+<p>This section does not describe a library change, and is not part of
+this proposal. It is here to describe the relevant language part of the
+pattern matching design, since that language design informs the library
+design in this paper.</p>
+<p>TODO: Describe language feature semantics, in terms of
+variant-like.</p>
+<h1 data-number="2" id="design"><span class="header-section-number">2</span> Design<a href="#design" class="self-link"></a></h1>
+<p>There are two options for exactly how to define the
+<code class="sourceCode cpp"><em>variant-like</em></code> concept.</p>
+<h2 data-number="2.1" id="option-1-an-explicit-list-of-enabled-templates"><span class="header-section-number">2.1</span> Option 1: An Explicit List of
+Enabled Templates<a href="#option-1-an-explicit-list-of-enabled-templates" class="self-link"></a></h2>
+<p>This is what the
+<code class="sourceCode cpp"><em>tuple-like</em></code> concept does.
+The standard says, “A type <code class="sourceCode cpp">T</code> models
+and satisfies the exposition-only concept <em>tuple-like</em> if <code class="sourceCode cpp">remove_cvref_t<span class="op">&lt;</span>T<span class="op">&gt;</span></code>
+is a specialization of <code class="sourceCode cpp">array</code>,
+<code class="sourceCode cpp">complex</code>,
+<code class="sourceCode cpp">pair</code>,
+<code class="sourceCode cpp">tuple</code>, or <code class="sourceCode cpp">ranges​<span class="op">::</span>​subrange</code>.”</p>
+<p>So, Option 1 would be to say nearly the same thing: “A type
+<code class="sourceCode cpp">T</code> models and satisfies the
+exposition-only concept <em>variant-like</em> if <code class="sourceCode cpp">remove_cvref_t<span class="op">&lt;</span>T<span class="op">&gt;</span></code>
+is a specialization of <code class="sourceCode cpp">expected</code> or
+<code class="sourceCode cpp">variant</code>.”</p>
+<p>This has the benefit of being consistent with how
+<code class="sourceCode cpp"><em>tuple-like</em></code> is defined.</p>
+<p>It has the disadvantage of being a maintenance burden. Future library
+additions of <code class="sourceCode cpp">variant</code>-like templates
+must remember to update the wording for
+<code class="sourceCode cpp"><em>variant-like</em></code>.</p>
+<h2 data-number="2.2" id="option-2-a-more-complicated-more-general-concept"><span class="header-section-number">2.2</span> Option 2: A More Complicated,
+More General Concept<a href="#option-2-a-more-complicated-more-general-concept" class="self-link"></a></h2>
+<p>Another way to define
+<code class="sourceCode cpp"><em>variant-like</em></code> would be to
+provide wording that applies to
+<code class="sourceCode cpp">std<span class="op">::</span>variant</code>
+and <code class="sourceCode cpp">std<span class="op">::</span>expected</code>,
+which is designed to be general enough to encompass similar types.</p>
+<p>TODO TODO TODO: other definition here</p>
+<p>This has the benefit of being more maintainable.</p>
+<p>This definition also has the disadvantage of novelty, and
+specifically of not having more than two templates that model it. This
+means that it might not work just to add new templates without adjusting
+<code class="sourceCode cpp"><em>variant-like</em></code> anyway, for
+reasons we can not anticipate now.</p>
+<h2 data-number="2.3" id="modifying-stdvisit"><span class="header-section-number">2.3</span> Modifying
+<code class="sourceCode cpp">std<span class="op">::</span>visit</code><a href="#modifying-stdvisit" class="self-link"></a></h2>
+<p>Modifying
+<code class="sourceCode cpp">std<span class="op">::</span>visit</code>
+to handle <em>variant-like</em> types is optional. It seems useful to be
+able to use
+<code class="sourceCode cpp">std<span class="op">::</span>visit</code>
+for <code class="sourceCode cpp">std<span class="op">::</span>expected</code>s,
+since they are gaining <em>variant-like</em> status. However, modifying
+<code class="sourceCode cpp">std<span class="op">::</span>visit</code>
+will not be directly used by the pattern matching language rules. In
+fact, once pattern matching is available, the use cases for
+<code class="sourceCode cpp">std<span class="op">::</span>visit</code>
+will be few and far between. This something that LEWG should poll
+separately from the rest of the paper.</p>
+<p>The idea of the modification is to change the names of all the
+exposition-only <em>as-variant</em> overload set described in
+<span>22.6.7
+<a href="https://wg21.link/variant.visit">[variant.visit]</a></span> to
+<em>as-variant-like</em>, change
+<code class="sourceCode cpp">std<span class="op">::</span>visit</code>
+to use <em>as-variant-like</em>, then add these four new overloads:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T, <span class="kw">class</span> E<span class="op">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="kw">auto</span><span class="op">&amp;&amp;</span> <em>as-variant-like</em><span class="op">(</span>expected<span class="op">&lt;</span>T, E<span class="op">&gt;&amp;</span> var<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> var; <span class="op">}</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T, <span class="kw">class</span> E<span class="op">&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="kw">auto</span><span class="op">&amp;&amp;</span> <em>as-variant-like</em><span class="op">(</span><span class="kw">const</span> expected<span class="op">&lt;</span>T, E<span class="op">&gt;&amp;</span> var<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> var; <span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T, <span class="kw">class</span> E<span class="op">&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="kw">auto</span><span class="op">&amp;&amp;</span> <em>as-variant-like</em><span class="op">(</span>expected<span class="op">&lt;</span>T, E<span class="op">&gt;&amp;&amp;</span> var<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> std<span class="op">::</span>move<span class="op">(</span>var<span class="op">)</span>; <span class="op">}</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T, <span class="kw">class</span> E<span class="op">&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="kw">auto</span><span class="op">&amp;&amp;</span> <em>as-variant-like</em><span class="op">(</span><span class="kw">const</span> expected<span class="op">&lt;</span>T, E<span class="op">&gt;&amp;&amp;</span> var<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> std<span class="op">::</span>move<span class="op">(</span>var<span class="op">)</span>; <span class="op">}</span></span></code></pre></div>
+<p>We would also need to add overloads of the <em>GET</em>
+exposition-only function defned in <span>22.6.5
+<a href="https://wg21.link/variant.get">[variant.get]</a></span>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="dt">size_t</span> I, <span class="kw">class</span><span class="op">...</span> Types<span class="op">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> variant_alternative_t<span class="op">&lt;</span>I, variant<span class="op">&lt;</span>T, E<span class="op">&gt;&gt;&amp;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <em>GET</em><span class="op">(</span>expected<span class="op">&lt;</span>T, E<span class="op">&gt;&amp;</span> v<span class="op">)</span>;</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="dt">size_t</span> I, <span class="kw">class</span><span class="op">...</span> Types<span class="op">&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> variant_alternative_t<span class="op">&lt;</span>I, variant<span class="op">&lt;</span>T, E<span class="op">&gt;&gt;&amp;&amp;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <em>GET</em><span class="op">(</span>expected<span class="op">&lt;</span>T, E<span class="op">&gt;&amp;&amp;</span> v<span class="op">)</span>;</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="dt">size_t</span> I, <span class="kw">class</span><span class="op">...</span> Types<span class="op">&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="kw">const</span> variant_alternative_t<span class="op">&lt;</span>I, variant<span class="op">&lt;</span>T, E<span class="op">&gt;&gt;&amp;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <em>GET</em><span class="op">(</span><span class="kw">const</span> expected<span class="op">&lt;</span>T, E<span class="op">&gt;&amp;</span> v<span class="op">)</span>;</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="dt">size_t</span> I, <span class="kw">class</span><span class="op">...</span> Types<span class="op">&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="kw">const</span> variant_alternative_t<span class="op">&lt;</span>I, variant<span class="op">&lt;</span>T, E<span class="op">&gt;&gt;&amp;&amp;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <em>GET</em><span class="op">(</span><span class="kw">const</span> expected<span class="op">&lt;</span>T, E<span class="op">&gt;&amp;&amp;</span> v<span class="op">)</span>;</span></code></pre></div>
 <h1 data-number="3" id="proposed-wording"><span class="header-section-number">3</span> Proposed Wording<a href="#proposed-wording" class="self-link"></a></h1>
 <p>Add a new section [variant.like] after <span>22.6.2
 <a href="https://wg21.link/variant.syn">[variant.syn]</a></span>:</p>
 <h3 class="unnumbered unlisted" id="variant.like-concept-variant-like">22.6.2+1 [variant.like] Concept
 <em>variant-like</em><a href="#variant.like-concept-variant-like" class="self-link"></a></h3>
 <div>
-<div class="sourceCode" id="cb1"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T&gt;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   concept <em>variant-like</em> = <em>see below</em>;           // exposition only</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   concept <em>variant-like</em> = <em>see below</em>;           // exposition only</span></span></code></pre></div>
 </div>
+<p>Then, define
+<code class="sourceCode cpp"><em>variant-like</em></code> as outlined in
+Option 1:</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 A type <code class="sourceCode default">T</code> models and satisfies
@@ -491,6 +630,16 @@ the exposition-only concept <em>variant-like</em> if
 specialization of <code class="sourceCode default">expected</code> or
 <code class="sourceCode default">variant</code>.</p>
 </div>
+<p>… or define <code class="sourceCode cpp"><em>variant-like</em></code>
+as outlined in Option 2:</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+A type <code class="sourceCode default">T</code> models and satisfies
+the exposition-only concept <em>variant-like</em> if
+<code class="sourceCode default">remove_cvref_t&lt;T&gt;</code> is a
+specialization of <code class="sourceCode default">expected</code> or
+<code class="sourceCode default">variant</code>. TODO TODO TODO</p>
+</div>
 <p>Add a new member function <code class="sourceCode cpp">index</code>
 to <span>22.8.6.1
 <a href="https://wg21.link/expected.object.general">[expected.object.general]</a></span></p>
@@ -498,23 +647,23 @@ to <span>22.8.6.1
 <a href="https://wg21.link/expected.object.general">[expected.object.general]</a></span>
 General<a href="#expected.object.general-general" class="self-link"></a></h3>
 <div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>namespace std {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  template&lt;class T, class E&gt;</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  class expected {</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  public:</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    ...</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    // [expected.object.obs], observers</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    ...</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    template&lt;class U&gt; constexpr T value_or(U&amp;&amp;) const &amp;;</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    template&lt;class U&gt; constexpr T value_or(U&amp;&amp;) &amp;&amp;;</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) const &amp;;</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) &amp;&amp;;</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr size_t index() const noexcept;</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    ...</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  };</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>namespace std {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  template&lt;class T, class E&gt;</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  class expected {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  public:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    // [expected.object.obs], observers</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    template&lt;class U&gt; constexpr T value_or(U&amp;&amp;) const &amp;;</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    template&lt;class U&gt; constexpr T value_or(U&amp;&amp;) &amp;&amp;;</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) const &amp;;</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) &amp;&amp;;</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr size_t index() const noexcept;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  };</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <p>Add a new member function <code class="sourceCode cpp">index</code>
 to <span>22.8.6.6
@@ -523,7 +672,7 @@ to <span>22.8.6.6
 <a href="https://wg21.link/expected.object.obs">[expected.object.obs]</a></span>
 Observers<a href="#expected.object.obs-observers" class="self-link"></a></h3>
 <div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span></code></pre></div>
 </div>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">26</a></span>
@@ -537,19 +686,19 @@ to <span>22.8.7.1
 <a href="https://wg21.link/expected.void.general">[expected.void.general]</a></span>
 General<a href="#expected.void.general-general" class="self-link"></a></h3>
 <div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>template&lt;class T, class E&gt; requires is_void_v&lt;T&gt;</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>class expected {</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>public:</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  ...</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  // [expected.void.obs], observers</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  ...</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) const &amp;;</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) &amp;&amp;;</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>   ...</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a> };</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>template&lt;class T, class E&gt; requires is_void_v&lt;T&gt;</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>class expected {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>public:</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  // [expected.void.obs], observers</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) const &amp;;</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  template&lt;class G = E&gt; constexpr E error_or(G&amp;&amp;) &amp;&amp;;</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>   ...</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a> };</span></code></pre></div>
 </div>
 <p>Add a new member function <code class="sourceCode cpp">index</code>
 to <span>22.8.7.6
@@ -558,7 +707,7 @@ to <span>22.8.7.6
 <a href="https://wg21.link/expected.void.obs">[expected.void.obs]</a></span>
 Observers<a href="#expected.void.obs-observers" class="self-link"></a></h3>
 <div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ constexpr size_t index() const noexcept;</span></span></code></pre></div>
 </div>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">15</a></span>
@@ -570,13 +719,13 @@ Observers<a href="#expected.void.obs-observers" class="self-link"></a></h3>
 <h3 class="unnumbered unlisted" id="expected.asvariant-variant-like-access-to-expected">22.8.7.8+1
 [expected.asvariant] Variant-like access to expected<a href="#expected.asvariant-variant-like-access-to-expected" class="self-link"></a></h3>
 <div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, class E&gt;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   struct variant_size&lt;expected&lt;T, E&gt;&gt; : integral_constant&lt;size_t, 2&gt; { };</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   struct variant_alternative&lt;I, expected&lt;T, E&gt;&gt; {</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     using type = <em>see below</em> ;</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="va">+   };</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T, class E&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   struct variant_size&lt;expected&lt;T, E&gt;&gt; : integral_constant&lt;size_t, 2&gt; { };</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="va">+   struct variant_alternative&lt;I, expected&lt;T, E&gt;&gt; {</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="va">+     using type = <em>see below</em> ;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="va">+   };</span></span></code></pre></div>
 </div>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
@@ -588,14 +737,14 @@ Observers<a href="#expected.void.obs-observers" class="self-link"></a></h3>
 <code class="sourceCode default">E</code>.</p>
 </div>
 <div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp; get(expected&lt;T, E&gt;&amp; e);</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp;&amp; get(expected&lt;T, E&gt;&amp;&amp; e);</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr const variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp; get(const expected&lt;T, E&gt;&amp; e);</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr const variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp;&amp; get(const expected&lt;T, E&gt;&amp;&amp; e);</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp; get(expected&lt;T, E&gt;&amp; e);</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp;&amp; get(expected&lt;T, E&gt;&amp;&amp; e);</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr const variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp; get(const expected&lt;T, E&gt;&amp; e);</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;size_t I, class T, class E&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="va">+   constexpr const variant_alternative_t&lt;I, expected&lt;T, E&gt;&gt;&amp;&amp; get(const expected&lt;T, E&gt;&amp;&amp; e);</span></span></code></pre></div>
 </div>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
@@ -615,6 +764,13 @@ Observers<a href="#expected.void.obs-observers" class="self-link"></a></h3>
 </div>
 <h1 data-number="4" id="design-alternatives"><span class="header-section-number">4</span> Design Alternatives<a href="#design-alternatives" class="self-link"></a></h1>
 <h1 data-number="5" id="implementation-experience"><span class="header-section-number">5</span> Implementation Experience<a href="#implementation-experience" class="self-link"></a></h1>
+<h1 data-number="6" id="bibliography"><span class="header-section-number">6</span> References<a href="#bibliography" class="self-link"></a></h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="1" role="doc-bibliography">
+<div id="ref-P2688R3" class="csl-entry" role="doc-biblioentry">
+[P2688R3] Michael Park. 2024-10-16. Pattern Matching: `match`
+Expression. <a href="https://wg21.link/p2688r3"><div class="csl-block">https://wg21.link/p2688r3</div></a>
+</div>
+</div>
 </div>
 </div>
 </body>
