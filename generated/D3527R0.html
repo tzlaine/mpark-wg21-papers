@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-27" />
+  <meta name="dcterms.date" content="2024-11-29" />
   <title>Pattern Matching: *variant-like* and `std::expected`</title>
   <style>
       code{white-space: pre-wrap;}
@@ -428,7 +428,7 @@ code.sourceCode > span { display: inline; }
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-27</td>
+    <td>2024-11-29</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -497,9 +497,13 @@ For example:</p>
 <p>However, there is an unsupported type in the standard that is
 variant-like but is not covered by <span class="citation" data-cites="P2688R3">[<a href="https://wg21.link/p2688r3" role="doc-biblioref">P2688R3</a>]</span> without explicit library
 support. That type is <code class="sourceCode cpp">std<span class="op">::</span>expected</code>.</p>
+<p>This proposal does not interact with the pattern matching language
+feature, nor does it interact with user defined types; it only affects
+whether <code class="sourceCode cpp">std<span class="op">::</span>expected</code>
+interoperates gracefully witth the language feature.</p>
 <p>This paper adds library facilities that allow <code class="sourceCode cpp">std<span class="op">::</span>expected</code> to
 conform to the notion of variant-like used in the pattern matching core
-wording. In order to accomplish this, we need to do three things:</p>
+wording. In order to accomplish this, we propose to do three things:</p>
 <ol type="1">
 <li>Introduce the <em>variant-like</em> exposition-only concept.</li>
 <li>Add <code class="sourceCode cpp">std<span class="op">::</span>expected</code> to
@@ -517,9 +521,8 @@ the changes in this paper).</p>
 <h2 data-number="1.1" id="the-variant-protocol"><span class="header-section-number">1.1</span> The Variant Protocol<a href="#the-variant-protocol" class="self-link"></a></h2>
 <p>The language semantics for pattern matching (<span class="citation" data-cites="P2688R3">[<a href="https://wg21.link/p2688r3" role="doc-biblioref">P2688R3</a>]</span>) include the notion of a
 “variant protocol”. This is analogous to the tuple protocol used for
-tuple-like (including aggregate) types. The tuple protocol is used in
-defining the behavior of structured bindings and pattern matching
-both.</p>
+structured bindings. The tuple protocol is used in defining the behavior
+of pattern matching as well.</p>
 <p>This section does not describe a library change, and is not part of
 this proposal. It is here to describe the relevant language part of the
 pattern matching design, since that language design informs the library
@@ -528,13 +531,12 @@ design in this paper.</p>
 variant-like.</p>
 <h1 data-number="2" id="design"><span class="header-section-number">2</span> Design<a href="#design" class="self-link"></a></h1>
 <p>There are two options for exactly how to define the
-<code class="sourceCode cpp"><em>variant-like</em></code> concept.</p>
+<em>variant-like</em> concept.</p>
 <h2 data-number="2.1" id="option-1-an-explicit-list-of-enabled-templates"><span class="header-section-number">2.1</span> Option 1: An Explicit List of
 Enabled Templates<a href="#option-1-an-explicit-list-of-enabled-templates" class="self-link"></a></h2>
-<p>This is what the
-<code class="sourceCode cpp"><em>tuple-like</em></code> concept does.
-The standard says, “A type <code class="sourceCode cpp">T</code> models
-and satisfies the exposition-only concept <em>tuple-like</em> if <code class="sourceCode cpp">remove_cvref_t<span class="op">&lt;</span>T<span class="op">&gt;</span></code>
+<p>This is what the <em>tuple-like</em> concept does. The standard says,
+“A type <code class="sourceCode cpp">T</code> models and satisfies the
+exposition-only concept <em>tuple-like</em> if <code class="sourceCode cpp">remove_cvref_t<span class="op">&lt;</span>T<span class="op">&gt;</span></code>
 is a specialization of <code class="sourceCode cpp">array</code>,
 <code class="sourceCode cpp">complex</code>,
 <code class="sourceCode cpp">pair</code>,
@@ -544,17 +546,15 @@ is a specialization of <code class="sourceCode cpp">array</code>,
 exposition-only concept <em>variant-like</em> if <code class="sourceCode cpp">remove_cvref_t<span class="op">&lt;</span>T<span class="op">&gt;</span></code>
 is a specialization of <code class="sourceCode cpp">expected</code> or
 <code class="sourceCode cpp">variant</code>.”</p>
-<p>This has the benefit of being consistent with how
-<code class="sourceCode cpp"><em>tuple-like</em></code> is defined.</p>
+<p>This has the benefit of being consistent with how <em>tuple-like</em>
+is defined.</p>
 <p>It has the disadvantage of being a maintenance burden. Future library
 additions of <code class="sourceCode cpp">variant</code>-like templates
-must remember to update the wording for
-<code class="sourceCode cpp"><em>variant-like</em></code>.</p>
+must remember to update the wording for <em>variant-like</em>.</p>
 <h2 data-number="2.2" id="option-2-a-more-complicated-more-general-concept"><span class="header-section-number">2.2</span> Option 2: A More Complicated,
 More General Concept<a href="#option-2-a-more-complicated-more-general-concept" class="self-link"></a></h2>
-<p>Another way to define
-<code class="sourceCode cpp"><em>variant-like</em></code> would be to
-provide wording that applies to
+<p>Another way to define <em>variant-like</em> would be to provide
+wording that applies to
 <code class="sourceCode cpp">std<span class="op">::</span>variant</code>
 and <code class="sourceCode cpp">std<span class="op">::</span>expected</code>,
 which is designed to be general enough to encompass similar types.</p>
@@ -563,8 +563,7 @@ which is designed to be general enough to encompass similar types.</p>
 <p>This definition also has the disadvantage of novelty, and
 specifically of not having more than two templates that model it. This
 means that it might not work just to add new templates without adjusting
-<code class="sourceCode cpp"><em>variant-like</em></code> anyway, for
-reasons we can not anticipate now.</p>
+<em>variant-like</em> anyway, for reasons we can not anticipate now.</p>
 <h2 data-number="2.3" id="modifying-stdvisit"><span class="header-section-number">2.3</span> Modifying
 <code class="sourceCode cpp">std<span class="op">::</span>visit</code><a href="#modifying-stdvisit" class="self-link"></a></h2>
 <p>Modifying
@@ -596,7 +595,7 @@ to use <em>as-variant-like</em>, then add these four new overloads:</p>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T, <span class="kw">class</span> E<span class="op">&gt;</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="kw">auto</span><span class="op">&amp;&amp;</span> <em>as-variant-like</em><span class="op">(</span><span class="kw">const</span> expected<span class="op">&lt;</span>T, E<span class="op">&gt;&amp;&amp;</span> var<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> std<span class="op">::</span>move<span class="op">(</span>var<span class="op">)</span>; <span class="op">}</span></span></code></pre></div>
 <p>We would also need to add overloads of the <em>GET</em>
-exposition-only function defned in <span>22.6.5
+exposition-only function defined in <span>22.6.5
 <a href="https://wg21.link/variant.get">[variant.get]</a></span>:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="dt">size_t</span> I, <span class="kw">class</span><span class="op">...</span> Types<span class="op">&gt;</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> variant_alternative_t<span class="op">&lt;</span>I, variant<span class="op">&lt;</span>T, E<span class="op">&gt;&gt;&amp;</span></span>
@@ -619,9 +618,7 @@ exposition-only function defned in <span>22.6.5
 <div class="sourceCode" id="cb4"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ template&lt;class T&gt;</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="va">+   concept <em>variant-like</em> = <em>see below</em>;           // exposition only</span></span></code></pre></div>
 </div>
-<p>Then, define
-<code class="sourceCode cpp"><em>variant-like</em></code> as outlined in
-Option 1:</p>
+<p>Then, define <em>variant-like</em> as outlined in Option 1:</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 A type <code class="sourceCode default">T</code> models and satisfies
@@ -630,8 +627,7 @@ the exposition-only concept <em>variant-like</em> if
 specialization of <code class="sourceCode default">expected</code> or
 <code class="sourceCode default">variant</code>.</p>
 </div>
-<p>… or define <code class="sourceCode cpp"><em>variant-like</em></code>
-as outlined in Option 2:</p>
+<p>… or define <em>variant-like</em> as outlined in Option 2:</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 A type <code class="sourceCode default">T</code> models and satisfies
