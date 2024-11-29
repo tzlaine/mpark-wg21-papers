@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-27" />
+  <meta name="dcterms.date" content="2024-11-29" />
   <title>Pattern Matching: `match` Expression</title>
   <style>
       code{white-space: pre-wrap;}
@@ -429,7 +429,7 @@ Expression</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-27</td>
+    <td>2024-11-29</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -592,7 +592,48 @@ Matching: <em>variant-like</em> and <code class="sourceCode cpp">std<span class=
 </ul></li>
 <li>Further progress on <a href="#proposed-wording">Proposed
 Wording</a></li>
+<li>At the Wrocław meeting in November 2024, the following poll was
+taken in EWG:</li>
 </ul>
+<blockquote>
+<blockquote>
+<p>Poll: <span class="citation" data-cites="P2688R3">[<a href="https://wg21.link/p2688r3" role="doc-biblioref">P2688R3</a>]</span> — Pattern Matching:
+<code class="sourceCode cpp"><span class="cf">match</span></code>
+Expression, we encourage more work on the language-only paper towards
+C++26 in the next meeting (note: voting against this poll does not
+exclude getting pattern matching in C++29)</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">17</td>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">9</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+</blockquote>
 <h1 class="unnumbered" id="updates-r2-r3">Updates R2 → R3<a href="#updates-r2-r3" class="self-link"></a></h1>
 <ul>
 <li>Required parentheses for the match guard syntax.
@@ -616,7 +657,45 @@ for details.</li>
 on the Implication Operator</a>.</li>
 <li>Added a section on <a href="#lifetime-extension-of-match-subject">Lifetime Extension of Match
 Subject</a>.</li>
+<li>At the EWG Telecon in October 2024, the following poll was
+taken:</li>
 </ul>
+<blockquote>
+<blockquote>
+<p>Poll: <span class="citation" data-cites="P2688R2">[<a href="https://wg21.link/p2688r2" role="doc-biblioref">P2688R2</a>]</span> - Pattern Matching: EWG likes
+direction of the paper.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+</blockquote>
 <h1 class="unnumbered" id="updates-r1-r2">Updates R1 → R2<a href="#updates-r1-r2" class="self-link"></a></h1>
 <ul>
 <li>Gained further <a href="#implementation-experience">Implementation
@@ -627,7 +706,46 @@ of
 <code class="sourceCode cpp"><span class="cf">match</span></code></a></li>
 <li>Decided against proposing a reflection-based tuple-like and
 variant-like protocols.</li>
+<li>At the Tokyo meeting in March 2024, the following poll was taken in
+EWG:</li>
 </ul>
+<blockquote>
+<blockquote>
+<p>Poll: <span class="citation" data-cites="P2688R1">[<a href="https://wg21.link/p2688r1" role="doc-biblioref">P2688R1</a>]</span> - Pattern Matching: EWG
+encourages more work on pattern matching, knowing our time is
+limited.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">34</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+</blockquote>
 <h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
 <p>This paper fleshes out the version of pattern matching that was
 described in <span class="citation" data-cites="P2688R0">[<a href="https://wg21.link/p2688r0" role="doc-biblioref">P2688R0</a>]</span>. It introduces a unified
@@ -678,7 +796,36 @@ for patterns to be composable (i.e. nested patterns):</p>
 <blockquote>
 <p>Poll: “EWG prefers composition over chaining in pattern matching
 syntax.”</p>
-<p>Result: SF: 13, F: 9, N: 2, A: 1, SA: 0</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
 </blockquote>
 <p>This paper presents (as did <span class="citation" data-cites="P1371R3">[<a href="https://wg21.link/p1371r3" role="doc-biblioref">P1371R3</a>]</span>) a design that continues to
 offer composable patterns.</p>
@@ -691,7 +838,36 @@ pattern matching to be available outside of
 proposed in P2392 or otherwise), knowing that time is limited and we
 already have put in a lot of effort towards another patmat
 proposal?”</p>
-<p>Result: SF: 11, F: 12, N:4, A: 2, SA: 0</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SF</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>F</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>N</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>A</strong>
+</div></th>
+<th style="text-align: center;"><div style="text-align:center">
+<strong>SA</strong>
+</div></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
 </blockquote>
 <p>This paper offers single pattern matching via <code class="sourceCode cpp"><em>expression</em> <span class="cf">match</span> <em>pattern</em></code>
 which is similar to the
@@ -4156,6 +4332,18 @@ With No Name. <a href="https://wg21.link/p2169r4"><div class="csl-block">https:/
 <div id="ref-P2688R0" class="csl-entry" role="doc-biblioentry">
 [P2688R0] Michael Park. 2022-10-16. Pattern Matching Discussion for Kona
 2022. <a href="https://wg21.link/p2688r0"><div class="csl-block">https://wg21.link/p2688r0</div></a>
+</div>
+<div id="ref-P2688R1" class="csl-entry" role="doc-biblioentry">
+[P2688R1] Michael Park. 2024-02-15. Pattern Matching: `match`
+Expression. <a href="https://wg21.link/p2688r1"><div class="csl-block">https://wg21.link/p2688r1</div></a>
+</div>
+<div id="ref-P2688R2" class="csl-entry" role="doc-biblioentry">
+[P2688R2] Michael Park. 2024-09-17. Pattern Matching: `match`
+Expression. <a href="https://wg21.link/p2688r2"><div class="csl-block">https://wg21.link/p2688r2</div></a>
+</div>
+<div id="ref-P2688R3" class="csl-entry" role="doc-biblioentry">
+[P2688R3] Michael Park. 2024-10-16. Pattern Matching: `match`
+Expression. <a href="https://wg21.link/p2688r3"><div class="csl-block">https://wg21.link/p2688r3</div></a>
 </div>
 <div id="ref-P2806R2" class="csl-entry" role="doc-biblioentry">
 [P2806R2] Barry Revzin, Bruno Cardoso Lopez, Zach Laine, Michael Park.
