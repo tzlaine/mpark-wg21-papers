@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-29" />
+  <meta name="dcterms.date" content="2024-11-30" />
   <title>Pattern Matching: `match` Expression</title>
   <style>
       code{white-space: pre-wrap;}
@@ -429,7 +429,7 @@ Expression</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-29</td>
+    <td>2024-11-30</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -4264,6 +4264,32 @@ deduced as though from a <code class="sourceCode default">return</code>
 statement with no operand at the closing brace of the function body of a
 function with the declared return type.</p>
 </div>
+<h3 class="unnumbered unlisted" id="temp.dep.expr-type-dependent-expressions"><span>13.8.3.3
+<a href="https://wg21.link/temp.dep.expr">[temp.dep.expr]</a></span>
+Type-dependent expressions<a href="#temp.dep.expr-type-dependent-expressions" class="self-link"></a></h3>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+Expressions of the following forms are never type-dependent (because the
+type of the expression cannot be dependent):</p>
+<div>
+<div class="sourceCode" id="cb171"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb171-1"><a href="#cb171-1" aria-hidden="true" tabindex="-1"></a>    <em>literal</em></span>
+<span id="cb171-2"><a href="#cb171-2" aria-hidden="true" tabindex="-1"></a>    sizeof <em>unary-expression</em></span>
+<span id="cb171-3"><a href="#cb171-3" aria-hidden="true" tabindex="-1"></a>    sizeof ( <em>type-id</em> )</span>
+<span id="cb171-4"><a href="#cb171-4" aria-hidden="true" tabindex="-1"></a>    sizeof ... ( <em>identifier</em> )</span>
+<span id="cb171-5"><a href="#cb171-5" aria-hidden="true" tabindex="-1"></a>    alignof ( <em>type-id</em> )</span>
+<span id="cb171-6"><a href="#cb171-6" aria-hidden="true" tabindex="-1"></a>    typeid ( <em>expression</em> )</span>
+<span id="cb171-7"><a href="#cb171-7" aria-hidden="true" tabindex="-1"></a>    typeid ( <em>type-id</em> )</span>
+<span id="cb171-8"><a href="#cb171-8" aria-hidden="true" tabindex="-1"></a>    ::<em><sub>opt</sub></em> delete <em>cast-expression</em></span>
+<span id="cb171-9"><a href="#cb171-9" aria-hidden="true" tabindex="-1"></a>    ::<em><sub>opt</sub></em> delete [ ] <em>cast-expression</em></span>
+<span id="cb171-10"><a href="#cb171-10" aria-hidden="true" tabindex="-1"></a>    throw <em>assignment-expression<sub>opt</sub></em></span>
+<span id="cb171-11"><a href="#cb171-11" aria-hidden="true" tabindex="-1"></a>    noexcept ( <em>expression</em> )</span>
+<span id="cb171-12"><a href="#cb171-12" aria-hidden="true" tabindex="-1"></a>    <em>requires-expression</em></span>
+<span id="cb171-13"><a href="#cb171-13" aria-hidden="true" tabindex="-1"></a><span class="va">+   <em>match-test-expression</em></span></span></code></pre></div>
+</div>
+<p><span class="note"><span>[ <em>Note:</em> </span>For the standard
+library macro <code class="sourceCode cpp">offsetof</code>, see
+<span>17.2
+<a href="https://wg21.link/support.types">[support.types]</a></span>.<span>
+— <em>end note</em> ]</span></span></p>
 <h1 data-number="9" id="acknowledgements"><span class="header-section-number">9</span> Acknowledgements<a href="#acknowledgements" class="self-link"></a></h1>
 <p>Thank you to all of the following folks</p>
 <ul>
